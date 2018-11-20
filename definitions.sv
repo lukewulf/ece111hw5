@@ -14,10 +14,14 @@ typedef enum logic {
   DISABLE = 1'b0
 } Signal;
 
+parameter RegAddrWidth = 5;
+
+typedef logic[RegAddrWidth-1:0]  RegAddr;
+typedef logic[31:0] Register;
+
 typedef logic[7:0]  ProgramCounter;
 typedef logic[31:0] Instruction;
 typedef logic[5:0]  OpCode;
-typedef logic[4:0]  Register;
 typedef logic[4:0]  ShAmt;
 typedef logic[15:0] Immediate;
 typedef logic[25:0] JumpAddr;
@@ -25,9 +29,9 @@ typedef logic[25:0] JumpAddr;
 // decompose an Instruction into R-Type components
 typedef struct packed {
   OpCode   opcode;
-  Register rs;
-  Register rt;
-  Register rd;
+  RegAddr rs;
+  RegAddr rt;
+  RegAddr rd;
   ShAmt    shamt;
   OpCode   funct;
 } RType;
@@ -35,8 +39,8 @@ typedef struct packed {
 // decompose an Instruction into I-Type components
 typedef struct packed {
   OpCode    opcode;
-  Register  rs;
-  Register  rt;
+  RegAddr  rs;
+  RegAddr  rt;
   Immediate imm;
 } IType;
 
