@@ -4,14 +4,13 @@ import definitions::*;
 module D(
     input wire        clk,
     input Signal      reset,
+    input Signal      write,
     input Register    rd_i,
     input Instruction instr,
 
     output Register   rs_o,
     output Register   rt_o
 );
-
-Signal write;
 
 RegAddr rs, rt, rd;
 
@@ -48,14 +47,12 @@ always_comb begin
             rs    = instr_r.rs;
             rt    = instr_r.rt;
             rd    = instr_r.rd;
-            write = ENABLE;
         end
 
         ADDI: begin  //  R[rt] = R[rs] + SignExtImm 
             rs    = instr_i.rs;
             rt    = RegAddr'(0);  // dont care
             rd    = instr_i.rt; // use rt as the write register
-            write = ENABLE;
         end
 
         BEQ: begin  // if(R[rs]==R[rt]) PC=PC+4+BranchAddr
@@ -63,21 +60,18 @@ always_comb begin
             rs    = instr_i.rs;
             rt    = instr_i.rt;
             rd    = RegAddr'(0);  // dont care
-            write = DISABLE;
         end
 
         LW: begin  // R[rt] = M[R[rs]+SignExtImm]
             rs    = instr_i.rs;
             rt    = RegAddr'(0);  // dont care
             rd    = instr_i.rt;
-            write = ENABLE;
         end
 
         SW: begin  //  M[R[rs]+SignExtImm] = R[rt]
             rs    = instr_i.rs;
             rt    = instr_i.rt;
             rd    = RegAddr'(0);  // dont care
-            write = DISABLE;
         end
 
         default: begin // J
@@ -85,7 +79,6 @@ always_comb begin
             rs    = RegAddr'(0);
             rt    = RegAddr'(0);
             rd    = RegAddr'(0);
-            write = DISABLE;
         end
     endcase
 end
