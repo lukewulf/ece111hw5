@@ -16,7 +16,7 @@ module RegisterFile(
     output Register rt_o
 );
 
-parameter bus_size = RegAddrWidth**2;
+parameter bus_size = 2**RegAddrWidth;
 
 Register regs [(bus_size - 1):0];
 
