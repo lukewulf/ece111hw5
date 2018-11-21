@@ -1,139 +1,165 @@
-// Create Date:     2017.11.05
-// Latest rev date: 2017.11.06
-// Created by:      J Eldon
-// Design Name:     CSE141L
-// Module Name:     top (top of sample microprocessor design) 
+
 import definitions::*;
 
 module top(
   input clk,  
-        reset,
-	init,
-  output logic done
-);
-  parameter IW = 8;				// program counter / instruction pointer
-  
-
-  logic Halt;
-  wire[IW-1:0] PC;                    // pointer to insr. mem
-  wire[   8:0] InstOut;				// 9-bit machine code from instr ROM
-  wire[   7:0] rt_val_o,			// reg_file data outputs to ALU
-               rs_val_o,			// 
-               result_o;			// ALU data output
-
-  assign carry_clr = reset;
-
-
-  logic      rf_sel;			   // conrol
-  logic[7:0] reg_data_in;            // data bus
-
-// Controller wires
-  op_code ALUop;
-  wire reg_write;
-  wire set;
-  wire bne;
-  wire read_mem;
-  wire write_mem;
-  wire memToReg;
-  wire bypass;
-  wire slp;
-
-// Register File Wires
- logic[1:0] rs_sel;		// output of 2:1 mux before rs_addr_i
-
-// ALU Wires
- wire zero;
- wire parity;
-
-// Bypass Wires
- logic[7:0] rs_slp;
- logic[7:0] slp_o;
- logic[7:0] bypass_o;
-
-// Memory Wires
- wire [7:0] mem_data;
-
-// WB wires
- wire[7:0] data_wb;
-
-// IF wires
-logic branch;// = 1'b0, // branch to "offset"
-
-
-IF IF1(
-  .branch (branch)  ,   // branch to "offset"
-  .branch_adr   (rs_val_o )	 ,
-  .Reset    (reset )	 ,
-  .Halt     (init )	 ,
-  .CLK      (clk     )	 ,
-  .PC       (PC      )      // pointer to insr. mem
-  );				 
-
-
-InstROM #(.IW(8)) InstROM(
-  .InstAddress (PC),	// address pointer
-  .InstOut (InstOut));
-
-Controller Controller1(
-	.msb (InstOut[8]),			//MSB of instruction
-	.opCode (InstOut[7:5]),		//opCode to decode
-	.ALUop(ALUop),		//ALU operation to send to ALU
-	.reg_write(reg_write),		//Register File Write Control
-	.set(set),		//SET operation control for MUX's
-	.bne(bne),		//BNE operation is called
-	.read_mem(read_mem),		//Data Memory Read Control
-	.write_mem(write_mem),		//Data Memory Write Control
-	.memToReg(memToReg),		//Control to choose between memory and ALU output
-	.bypass(bypass),		//Control to Bypass ALU 
-	.slp(slp)		//Control to choose SLP over the bypass line
+        rst,
+  output y
 );
 
-assign rs_sel = set ? 2'b00 : InstOut[4:3];
-assign reg_data_in = set ? InstOut[7:0] : data_wb;	
+Signal reset;
+assign reset = Signal'(rst);
 
-reg_file #(.raw(2)) rf1	 (
-  .clk		     (clk		    ),   // clock (for writes only)
-  .rs_addr_i	 (rs_sel ),   // read pointer rs
-  .rt_addr_i	 (InstOut[2:1]  ),   // read pointer rt
-  .wen_i		 (reg_write	    ),   // write enable
-  .level 	 (InstOut[0]),
-  .write_data_i	 (reg_data_in   ),   // data to be written/loaded 
-  .rs_val_o	     (rs_val_o	    ),   // data read out of reg file
-  .rt_val_o		 (rt_val_o	    )
-                );
 
-alu alu1(.rs_i     (rs_val_o)     ,	
-         .rt_i	   (rt_val_o)	  ,	
-         .op_i   (ALUop)	  ,	
-// outputs
-         .result_o (result_o) ,
-		 .zero    (zero   ) ,
-		 .parity (parity ));
+// IF Wires
+Signal stall; assign stall = DISABLE;
 
-reg zero_reg;
-reg parity_reg;
-always @ (posedge clk)
-begin
-	zero_reg <= zero;
-	parity_reg <= parity;
-end
+wire branch;
+wire alu_zero;
+wire jmp;
+ProgramCounter _pc_branch, pc_jmp;
 
-assign rs_slp = {rs_val_o[6:0], parity_reg};
-assign slp_o = slp ? rs_slp : rs_val_o;
-assign bypass_o = bypass ? slp_o : result_o; 	//Output of the Execute stage
-assign branch = bne & ~zero_reg;
+ProgramCounter pc;
 
-//Checked
-data_mem data_mem(
-   .CLK           (clk        ),        
-   .DataAddress   (rt_val_o),	//All stores and loads choose from the second address
-   .ReadMem       (read_mem     ), // read_mem from Controller 		
-   .WriteMem      (write_mem ), // write_mem from Controller		
-   .DataIn        (rs_val_o  ), // All data in is always the output of the reg file	
-   .DataOut       (mem_data   )  // load  (to RF)
+IF fetch(
+ 	.clk(clk),
+ 	.reset(reset),
+	.stall(stall),
+	.branch(branch),
+	.alu_zero(alu_zero),
+	.jmp(jmp),
+	.pc_branch(_pc_branch),
+	.pc_jmp(pc_jmp),
+	.pc(pc)
+);
+// InstROM Wires
+Instruction instr;
+RType instr_r; assign instr_r = RType'(instr);
+JType instr_j; assign instr_j = JType'(instr);
+
+assign pc_jmp = instr_j.addr[7:0];
+
+InstROM i_mem(
+	.addr(pc),
+	.instr(instr)
 );
 
-assign data_wb = memToReg ? mem_data : bypass_o;
-assign done = (PC == 79) || (PC == 222);
 
+// Control Signals
+wire [5:0] opcode = instr_r.opcode;
+wire [1:0] x_op;
+wire reg_dst;
+wire alu_src;
+Signal reg_write;
+Signal mem_read;
+Signal mem_write;
+wire mem_to_reg;
+
+
+Controller control(
+	.opCode(opcode),
+	.ALUop(x_op),
+	.aluSrc(alu_src),
+	.reg_write(reg_write),
+	.read_mem(mem_read),
+	.write_mem(mem_write),
+	.memToReg(mem_to_reg),
+	.jmp(jmp),
+	.branch(branch),
+	.reg_dst(reg_dst)
+);
+
+// D Wires
+
+Register reg_in, rs_out, rt_out;
+
+D decode(
+	.clk(clk),
+	.reset(reset),
+	.write(reg_write),
+	.rd_i(reg_in),
+	.instr(instr),
+	.rs_o(rs_out),
+	.rt_o(rt_out)
+);
+
+// X Wires
+
+
+wire [31:0] _pc;
+assign _pc = {24'b0, pc};
+
+wire [31:0] immediate;
+wire [31:0] rs_val; assign rs_val = rs_out;
+wire [31:0] rt_val; assign rt_val = rt_out;
+
+wire [4:0] rt_addr; assign rt_addr = instr_r.rt;
+wire [4:0] rd_addr; assign rd_addr = instr_r.rd;
+
+wire [31:0] pc_branch;
+assign _pc_branch = pc_branch[7:0];
+
+wire [31:0] alu_out;
+wire [31:0] rt_val_out;
+
+wire [4:0] reg_dst_addr;
+
+X execute(
+	.op(x_op),
+	.reg_dst(reg_dst),
+	.aluSrc(alu_src),
+	.pc(_pc),
+	.immediate(immediate),
+	.rs_val(rs_val),
+	.rt_val(rt_val),
+	.rt_addr(rt_addr),
+	.rd_addr(rd_addr),
+	.zero(alu_zero),
+	.pc_branch(pc_branch),
+	.alu_out(alu_out),
+	.rt_val_out(rt_val_out),
+	.reg_dst_addr(reg_dst_addr)
+);
+
+
+// M Wires
+Register mem_addr;
+assign mem_addr = Register'(alu_out);
+
+
+
+Register mem_in;
+assign mem_in = Register'(rt_val_out);
+
+Register mem_out;
+
+M memory(
+	.clk(clk),
+	.reset(reset),
+	.addr(mem_addr),
+	.read(mem_read),
+	.write(mem_write),
+	.mem_in(mem_in),
+	.mem_out(mem_out)
+);
+
+// WB Wires
+wire [31:0] mem_data;
+assign mem_data = mem_out;
+
+wire [31:0] alu_data;
+assign alu_data = alu_out;
+
+
+
+wire [31:0] wb_data;
+
+WB writeback(
+	.mem_data(mem_data),
+	.alu_data(alu_data),
+	.memToReg(mem_to_reg),
+	.wb_data(wb_data)
+);
+
+assign y = ^mem_data;
 endmodule

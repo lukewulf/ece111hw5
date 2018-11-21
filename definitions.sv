@@ -30,6 +30,13 @@ typedef enum logic[5:0]{
   SW    = 6'h2b
 } OpCode;
 
+typedef enum logic[1:0]{
+  ALU_ADD = 2'b00,
+  ALU_SUB = 2'b01,
+  ALU_AND = 2'b10,
+  ALU_OR = 2'b11
+} op_code;
+
 typedef enum logic[5:0]{
   ADD = 6'h20,
   SUB = 6'h22,

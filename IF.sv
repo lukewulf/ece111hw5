@@ -5,8 +5,10 @@ module IF(
   input Signal          stall,  // prevent pc changes
   input wire            branch,
   input wire            alu_zero,
-  input ProgramCounter  pc_ext, // external pc source (branch, stall)
-  
+  input wire            jmp,
+  input ProgramCounter  pc_branch, // external pc source (branch, stall) 
+  input ProgramCounter  pc_jmp,
+
   output ProgramCounter pc
 );
 
@@ -21,8 +23,10 @@ always_ff@(posedge clk) begin
     _pc <= 0;
   else if (stall == ENABLE)
     _pc <= _pc;
+  else if (jmp == 1'b1)
+    _pc <= pc_jmp;
   else if (pc_src == 1'b1)
-    _pc <= pc_ext;
+    _pc <= pc_branch;
   else
     _pc <= pc + 1;
 end
