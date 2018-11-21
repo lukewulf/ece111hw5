@@ -1,5 +1,5 @@
 import definitions::*;
-module DataMemory(
+module M(
   input  wire     clk,
   input  Register addr,
   input  Signal   read,

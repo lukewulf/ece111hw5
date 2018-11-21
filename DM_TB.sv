@@ -8,7 +8,7 @@ Signal write;
 Register mem_in;
 Register mem_out;
 
-DataMemory DM(
+M DM(
     .clk(clk),
 
     .addr(addr),
