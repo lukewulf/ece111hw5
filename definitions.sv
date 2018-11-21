@@ -14,6 +14,8 @@ typedef enum logic {
   DISABLE = 1'b0
 } Signal;
 
+parameter MemAddrWidth = 4;
+
 parameter RegAddrWidth = 5;
 
 typedef logic[RegAddrWidth-1:0]  RegAddr;
