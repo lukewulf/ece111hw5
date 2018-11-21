@@ -13,7 +13,7 @@ begin
 				// Add
 				6'b10_0000: alu_op = ADD;
 				// Sub
-				6'b10_0011: alu_op = SUB;
+				6'b10_0010: alu_op = SUB;
 				// And
 				6'b10_0100: alu_op = AND;
 				// Or
