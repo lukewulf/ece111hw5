@@ -12,11 +12,11 @@ Register mem [2**MemAddrWidth];
 
 initial begin
 	$display("TEST");
-	$readmemb("newest16.bin", mem);
+	$readmemh("prog1_mem.hex", mem);
 end
 
 wire [MemAddrWidth-1:0] _addr;
-assign _addr = addr[MemAddrWidth-1:0];
+assign _addr = addr[MemAddrWidth-1+2:0+2];
 
 always_comb begin
     if (read == ENABLE) mem_out = mem[_addr];

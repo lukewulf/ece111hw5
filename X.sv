@@ -15,7 +15,7 @@ module X( input [1:0] op,
 	  output [31:0] rt_val_out,
 	  output [4:0] reg_dst_addr);
 
-assign pc_branch = pc + immediate;
+assign pc_branch = pc + immediate + 1;
 assign reg_dst_addr = reg_dst ? rd_addr : rt_addr;
 assign rt_val_out = rt_val;
 

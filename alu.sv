@@ -19,19 +19,19 @@ always_comb
   
   case (op3)   						
 
-	OR: begin					
+	ALU_OR: begin					
 		result_o = rs_i | rt_i;
 		end
 
-	AND: begin					
+	ALU_AND: begin					
 		result_o = rs_i & rt_i;
 		end
 
-	ADD: begin					
+	ALU_ADD: begin					
 		result_o = rs_i + rt_i;
 		end
 
-	SUB: begin
+	ALU_SUB: begin
 		result_o = rs_i - rt_i;
 		end
 
