@@ -10,8 +10,13 @@ module DataMemory(
 
 Register mem [2**MemAddrWidth];
 
+initial begin
+	$display("TEST");
+	$readmemb("newest16.bin", mem);
+end
+
 wire [MemAddrWidth-1:0] _addr;
-assign _addr = add[MemAddrWidth-1:0];
+assign _addr = addr[MemAddrWidth-1:0];
 
 always_comb begin
     if (read == ENABLE) mem_out = mem[_addr];
