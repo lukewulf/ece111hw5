@@ -1,30 +1,14 @@
 import definitions::*;
 
-module Hazard(	input RegAddr Drs,
-		input RegAddr Drt,
-		input RegAddr Drd,
-		input RegAddr Xrs,
-		input RegAddr Xrt,
-		input RegAddr Xrd,
-		input RegAddr Mrs,
-		input RegAddr Mrt,
-		input RegAddr Mrd,
-		//input RegAddr WBrs,
-		//input RegAddr WBrt,
-		//input RegAddr WBrd,
-		output Signal fwdXX_rs,
-		output Signal fwdXX_rt,
-		output Signal fwdMX_rs,
-		output Signal fwdMX_rt,
-		output Signal fwdMM_rt,
-		output Signal stallD,
-		output Signal stallIF);
+module Hazard(	input Hazard_input h_i,
+		output Hazard_output h_o
+);
 
-assign fwdXX_rs = (Drs == 5'bZZZZZ) ? DISABLE : (Xrd == Drs) ? ENABLE : DISABLE;
-assign fwdXX_rt = (Drt == 5'bZZZZZ) ? DISABLE : (Xrd == Drt) ? ENABLE : DISABLE;
-assign fwdMX_rs = (Drs == 5'bZZZZZ) ? DISABLE : (Mrd == Drs) ? ENABLE : DISABLE;
-assign fwdMX_rt = (Drt == 5'bZZZZZ) ? DISABLE : (Mrd == Drt) ? ENABLE : DISABLE;
-assign fwdMM_rt = (Xrt == 5'bZZZZZ) ? DISABLE : (Mrd == Xrt) ? ENABLE : DISABLE;
-assign stallD = (Mrd == 5'bZZZZZ) ? DISABLE : (Mrd == Drs || Mrd == Drt) ? ENABLE : DISABLE;
-assign stallF = stallD; 
+assign h_o.fwdXX_rs = (h_i.Drs == 5'bZZZZZ) ? DISABLE : (h_i.Xrd == h_i.Drs) ? ENABLE : DISABLE;
+assign h_o.fwdXX_rt = (h_i.Drt == 5'bZZZZZ) ? DISABLE : (h_i.Xrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.fwdMX_rs = (h_i.Drs == 5'bZZZZZ) ? DISABLE : (h_i.Mrd == h_i.Drs) ? ENABLE : DISABLE;
+assign h_o.fwdMX_rt = (h_i.Drt == 5'bZZZZZ) ? DISABLE : (h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.fwdMM_rt = (h_i.Xrt == 5'bZZZZZ) ? DISABLE : (h_i.Mrd == h_i.Xrt) ? ENABLE : DISABLE;
+assign h_o.stallD = (h_i.Mrd == 5'bZZZZZ) ? DISABLE : (h_i.Mrd == h_i.Drs || h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.stallF = h_o.stallD; 
 endmodule
