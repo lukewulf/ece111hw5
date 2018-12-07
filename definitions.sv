@@ -136,7 +136,10 @@ typedef struct packed {
 
 typedef struct packed {
   Register       rs;
+  RegAddr        rs_a;
   Register       rt;
+  RegAddr        rt_a;
+  RegAddr        rd_a;
   ProgramCounter pc_jmp;
 } D_output;
 
@@ -146,6 +149,7 @@ typedef struct packed {
   Register        imm;
   Register        rs;
   Register        rt;
+  RegAddr         rs_addr;
   RegAddr         rt_addr;
   RegAddr         rd_addr;
 } X_input;
@@ -161,6 +165,7 @@ typedef struct packed {
 typedef struct packed {
   Register addr;
   Register val; 
+  RegAddr  dst;
 } M_data;
 
 typedef struct packed {

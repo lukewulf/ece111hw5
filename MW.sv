@@ -8,7 +8,7 @@ module MW(
 	input WB_input  data_i,
 
 	output WB_ctrl  wb_ctrl,
-	output WB_input wb_data,
+	output WB_input wb_data
 );
 
 	always_ff @(posedge clk) begin

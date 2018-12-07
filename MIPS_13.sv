@@ -69,6 +69,7 @@ XM_ctrl xm_ctrl;
 M_input  m_in;
 M_output m_out;
 M_ctrl m_ctrl;
+M_data m_data;
 
 MW_ctrl  mw_ctrl;
 WB_input mw_data;
@@ -79,8 +80,8 @@ WB_output wb_out;
 WB_ctrl   wb_ctrl;
 
 // Hazard Wires
-Hazard_input = h_i;
-Hazard_output = h_o;
+Hazard_input h_i;
+Hazard_output h_o;
 
 // Control Wiring
 assign if_in.stall    = stall;
@@ -89,18 +90,17 @@ assign if_in.jmp      = m_ctrl.jmp;
 
 assign d_ctrl.write = wb_ctrl.reg_write;
 
-assign x_in.reg_dst = x_ctrl.reg_dst;
-assign x_in.alu_src = x_ctrl.alu_src;
+// assign x_in.reg_dst = x_ctrl.reg_dst;
+// assign x_in.alu_src = x_ctrl.alu_src;
 
-assign m_in.read  = m_ctrl.mem_read;
+assign m_in.read  = m_ctrl.read_mem;
 assign m_in.write = m_ctrl.write_mem;
 
-assign wb_in.src = wb_ctrl.mem_to_reg;
+// assign wb_in.src = wb_ctrl.mem_to_reg;
 
 // Interstage Wiring
 assign if_in.alu_zero  = x_out.zero;
 assign if_in.pc_branch = x_out.pc_branch;
-assign if_in.pc_jmp    = pc_jmp;
 
 assign d_in.rd    = wb_out.val;
 assign d_in.dst   = wb_out.dst;
@@ -108,20 +108,33 @@ assign d_in.dst   = wb_out.dst;
 assign m_in.data = m_data;
 
 assign mw_data.mem = m_out.val;
-assign mw_data.alu = m_data.alu;
-assign mw_data.dst = ;
+assign mw_data.alu = m_data.addr;
+assign mw_data.dst = m_data.dst;
 
 // Stage Buffer Wiring
 
 // struct DX_data {
 //     dx_in.pc     <- fetch_decode_buffer
-assign dx_in.rs_a   = RegAddr'(0);
+assign dx_in.rs_a   = d_out.rs_a;
 assign dx_in.rs_d   = d_out.rs;
-assign dx_in.rt_a   = RegAddr'(0);
+assign dx_in.rt_a   = d_out.rt_a;
 assign dx_in.rt_d   = d_out.rt;
+assign dx_in.rd_a   = d_out.rd_a;
 assign dx_in.imm    = {{16{instr_i.imm[15]}}, instr_i.imm};
 assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
+
+// struct Hazard_input {
+assign h_i.Drs = d_out.rs_a;  //    RegAddr Drs
+assign h_i.Drt = d_out.rt_a;  //    RegAddr Drt
+assign h_i.Drd = d_out.rd_a;  //    RegAddr Drd
+
+assign h_i.Xrs = dx_out.rs_a;  //   RegAddr Xrs;
+assign h_i.Xrt = dx_out.rt_a;  //   RegAddr Xrt;
+assign h_i.Xrd = dx_out.rd_a;  //   RegAddr Xrd;
+
+assign h_i.Mrd = m_data.dst;   //   RegAddr Mrd;
+// }
 
 assign y = m_out.val;
 
@@ -135,13 +148,13 @@ IF fetch(
 FD fetch_decode_buffer(
 	.clk(clk),
 	.rst(rst),
-	.stall(h_o.stallF),
+	.stall(h_o.stallIF),
 
 	.next_pc_i(if_out.pc),
 	.instr_i(instr),
 
 	.next_pc_o(d_in.pc),
-	.instr_o(d_in.instr),
+	.instr_o(d_in.instr)
 );
 
 D decode(
@@ -168,6 +181,7 @@ DX decode_execute_buffer(
 	.ctrl(dx_ctrl),
 	.data_i(dx_in),
 
+	.pc_jmp(if_in.pc_jmp),
 	.xm_ctrl(xm_ctrl),
 	.x_data(x_in)
 );
@@ -182,7 +196,7 @@ XM execute_mem_buffer(
 	.rst(rst),
 
 	.fwdM_rt(h_o.fwdMM_rt),
-	.M_d(m_out.alu),
+	.M_d(m_out.val),
 
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
@@ -191,7 +205,7 @@ XM execute_mem_buffer(
 	.m_ctrl(m_ctrl),
 
 	.m_data(m_data)
-)
+);
 
 M mem(
 	.clk(clk),

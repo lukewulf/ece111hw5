@@ -12,6 +12,10 @@ module D(
 
 RegAddr rs, rt, rd;
 
+assign out.rs_a = rs;
+assign out.rt_a = rt;
+assign out.rd_a = rd;
+
 RType instr_r;
 assign instr_r = RType'(in.instr);
 
