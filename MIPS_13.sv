@@ -70,7 +70,8 @@ M_input  m_in;
 M_output m_out;
 M_ctrl m_ctrl;
 
-MW_ctrl mw_ctrl;
+MW_ctrl  mw_ctrl;
+WB_input mw_data;
 
 // Writeback Wires
 WB_input  wb_in;
@@ -102,31 +103,23 @@ assign if_in.pc_branch = x_out.pc_branch;
 assign if_in.pc_jmp    = pc_jmp;
 
 assign d_in.rd    = wb_out.val;
-assign d_in.instr = instr;
 
-assign x_in.op      = x_ctrl.alu_op;
-assign x_in.pc      = dx_out.pc;
-assign x_in.imm     = dx_out.imm;
-assign x_in.rs      = dx_out.rs_d;
-assign x_in.rt      = dx_out.rt_d;
-assign x_in.rt_addr = dx_out.rt_a;
-assign x_in.rd_addr = dx_out.rd_a;
+assign m_in.data = m_data;
 
-assign m_in.addr = x_out.alu;
-assign m_in.val  = x_out.rt;
-
-assign wb_in.mem = m_out.val;
-assign wb_in.alu = x_out.alu;
+assign mw_data.mem = m_out.val;
+assign mw_data.alu = m_data.alu;
+assign mw_data.dst = ;
 
 // Stage Buffer Wiring
 
 // struct DX_data {
-//     dx_in.pc <- fetch_decode_buffer
-assign dx_in.rs_a = RegAddr'(0);
-assign dx_in.rs_d = d_out.rs;
-assign dx_in.rt_a = RegAddr'(0);
-assign dx_in.rt_d = d_out.rt;
-assign dx_in.imm  = {{16{instr_i.imm[15]}}, instr_i.imm};
+//     dx_in.pc     <- fetch_decode_buffer
+assign dx_in.rs_a   = RegAddr'(0);
+assign dx_in.rs_d   = d_out.rs;
+assign dx_in.rt_a   = RegAddr'(0);
+assign dx_in.rt_d   = d_out.rt;
+assign dx_in.imm    = {{16{instr_i.imm[15]}}, instr_i.imm};
+assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
 
 assign y = m_out.val;
@@ -146,7 +139,7 @@ FD fetch_decode_buffer(
 	.next_pc_i(if_out.pc),
 	.instr_i(instr),
 
-	.next_pc_o(dx_in.pc),
+	.next_pc_o(d_in.pc),
 	.instr_o(d_in.instr),
 );
 
@@ -174,9 +167,8 @@ DX decode_execute_buffer(
 	.ctrl(dx_ctrl),
 	.data_i(dx_in),
 
-	.xm(xm_ctrl),
-	.x(x_ctrl),
-	.data_o(dx_out)
+	.xm_ctrl(xm_ctrl),
+	.x_data(x_in)
 );
 
 X execute(
@@ -188,8 +180,16 @@ XM execute_mem_buffer(
 	.clk(clk),
 	.rst(rst),
 
-	.fwdM_rt
+	.fwdM_rt(),
+	.M_d(m_out.alu),
 
+	.ctrl(xm_ctrl),
+	.x_out(x_out),
+
+	.mw_ctrl(mw_ctrl),
+	.m_ctrl(m_ctrl),
+
+	.m_data(m_data)
 )
 
 M mem(
@@ -198,7 +198,19 @@ M mem(
 	.out(m_out)
 );
 
+MW mem_writeback_buffer(
+	.clk(clk),
+	.rst(rst),
+
+	.ctrl(mw_ctrl),
+	.data_i(mw_data),
+
+	.wb_ctrl(wb_ctrl),
+	.wb_data(wb_in)
+);
+
 WB writeback(
+	.ctrl(wb_ctrl),
 	.in(wb_in),
 	.out(wb_out)
 );

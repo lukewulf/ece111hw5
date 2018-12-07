@@ -18,32 +18,40 @@ module DX(
   input  DX_ctrl ctrl,
   input  DX_data data_i,
 
-  output XM_ctrl xm,
-  output X_ctrl  x,
-  output DX_data data_o
+  output ProgramCounter pc_jmp,
+  output XM_ctrl xm_ctrl,
+  output X_input x_data
 );
 
 always_ff @(posedge clk) begin
+
+  pc_jmp <= data_i.pc_jmp;
+
 	if(stall != DISABLE) begin
 		// Control signals
 		xm <= ctrl.xm;
-    		x  <= ctrl.x;
 
-   		data_o.pc   <= data_i.pc;
+    		x_data.ctrl <= ctrl.x;
+    		x_data.op   <= data_i.alu_op;
+    		x_data.pc   <= data_i.pc;
 
-		data_o.rs_a <= data_i.rs_a;
-		data_o.rs_d <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : data_i.rs_d;
-		data_o.rt_a <= data_i.rt_a;
-		data_o.rt_d <= (fwdX_rt) ? X_d : (fwdM_rt) ? M_d : data_i.rt_d;
+
+		x_data.rs_a <= data_i.rs_a;
+		x_data.rs_d <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : data_i.rs_d;
+		x_data.rt_a <= data_i.rt_a;
+		x_data.rt_d <= (fwdX_rt) ? X_d : (fwdM_rt) ? M_d : data_i.rt_d;
 		
-		data_o.rd_a <= data_i.rd_a;
+		x_data.rd_a <= data_i.rd_a;
 
-		data_o.imm  <= data_i.imm;
+		x_data.imm  <= data_i.imm;
 	end 
 	else begin
+
+
     		xm.mw.reg_write <= DISABLE;
     		xm.m.write_mem  <= DISABLE;
-    		data_o.rd_a     <= RegAddr'(0);
+    		x_data.rd_a     <= RegAddr'(0);
+
 	end
 end
 
