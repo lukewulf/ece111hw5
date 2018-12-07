@@ -1,13 +1,16 @@
 import definitions::*;
 
-module FD(	input wire clk,
-		input wire rst,
-		input ProgramCounter next_pc_i,
-		input Instruction instr_i,
-		input Signal stall,
+module FD(
+	input wire clk,
+	input wire rst,
+	input Signal stall,
+		
+	input ProgramCounter next_pc_i,
+	input Instruction instr_i,
 
-		output ProgramCounter next_pc_o,
-		output Instruction instr_o);
+	output ProgramCounter next_pc_o,
+	output Instruction instr_o
+);
 
 always_ff@(posedge clk) begin
 	if(stall != ENABLE) begin

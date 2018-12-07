@@ -7,50 +7,23 @@ module XM(	input wire clk,
 
 		input Register M_d,
 
-		// Control signals from control
-		input wire reg_write,
-		input wire read_mem,
-		input wire write_mem,
-		input wire memToReg,
-		input wire branch,
-		input wire jmp,
+		input XM_ctrl ctrl,
 
 		// Data from Execute
-		input ProgramCounter pc,
-		input wire alu_zero,
-		input wire [31:0] alu_out,
-		input wire [31:0] write_d,
-		input RegAddr  rd_a,
+		input X_output x_out,
 
 		// Control signals from control
-		output reg reg_write_o,
-		output reg read_mem_o,
-		output reg write_mem_o,
-		output reg memToReg_o,
-		output reg branch_o,
-		output reg jmp_o,
+		output MW_ctrl mw_ctrl,
+		output M_ctrl  m_ctrl,
 
-		// Data to Memory / Branch
-		output ProgramCounter pc_o,
-		output reg alu_zero_o,
-		output reg [31:0] alu_out_o,
-		output reg [31:0] write_d_o,
-		output RegAddr  rd_a_o);
+		output M_data  m_data
+);
 
 always_ff @ (posedge clk) begin
-	reg_write_o <= reg_write;
-	read_mem_o <= read_mem;
-	write_mem_o <= write_mem;
-	memToReg_o <= memToReg;
-	branch_o <= branch;
-	jmp_o <= jmp;
-
-	pc_o <= pc;
-	alu_zero_o <= alu_zero;
-	alu_out_o <= alu_out;
-	write_d_o <= (fwdM_rt == ENABLE) ? M_d : write_d;
-	rd_a_o <= rd_a;
-
+	mw_ctrl <= ctrl.mw;
+	m_ctrl  <= ctrl.m;
+	m_data.addr <= x_out.alu;
+	m_data.val  <= (fwdM_rt == ENABLE) ? M_d : write_d;
 end
 
 endmodule

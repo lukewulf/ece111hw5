@@ -53,33 +53,44 @@ IF_output if_out;
 D_control d_ctrl;
 D_input   d_in;
 D_output  d_out;
+DX_ctrl dx_ctrl;
+
+DX_data dx_in;
+DX_data dx_out;
 
 // Execute Wires
 X_input  x_in;
 X_output x_out;
+X_ctrl   x_ctrl;
+
+XM_ctrl xm_ctrl;
 
 // Data Memory Wires
 M_input  m_in;
 M_output m_out;
+M_ctrl m_ctrl;
+
+MW_ctrl mw_ctrl;
 
 // Writeback Wires
 WB_input  wb_in;
 WB_output wb_out;
+WB_ctrl   wb_ctrl;
 
 // Control Wiring
 assign if_in.stall    = stall;
-assign if_in.branch   = Signal'(branch);
-assign if_in.jmp      = Signal'(jmp);
+assign if_in.branch   = m_ctrl.branch;
+assign if_in.jmp      = m_ctrl.jmp;
 
-assign d_ctrl.write = reg_write;
+assign d_ctrl.write = wb_ctrl.reg_write;
 
-assign x_in.reg_dst = reg_dst;
-assign x_in.alu_src = alu_src;
+assign x_in.reg_dst = x_ctrl.reg_dst;
+assign x_in.alu_src = x_ctrl.alu_src;
 
-assign m_in.read  = mem_read;
-assign m_in.write = mem_write;
+assign m_in.read  = m_ctrl.mem_read;
+assign m_in.write = m_ctrl.write_mem;
 
-assign wb_in.src = Signal'(mem_to_reg);
+assign wb_in.src = wb_ctrl.mem_to_reg;
 
 // Interstage Wiring
 assign if_in.alu_zero  = x_out.zero;
@@ -89,19 +100,30 @@ assign if_in.pc_jmp    = pc_jmp;
 assign d_in.rd    = wb_out.val;
 assign d_in.instr = instr;
 
-assign x_in.op      = op_code'(x_op);
-assign x_in.pc      = if_out.pc;
-assign x_in.imm     = {{16{instr_i.imm[15]}}, instr_i.imm};
-assign x_in.rs      = d_out.rs;
-assign x_in.rt      = d_out.rt;
-assign x_in.rt_addr = instr_r.rt;
-assign x_in.rd_addr = instr_r.rd;
+assign x_in.op      = x_ctrl.alu_op;
+assign x_in.pc      = dx_out.pc;
+assign x_in.imm     = dx_out.imm;
+assign x_in.rs      = dx_out.rs_d;
+assign x_in.rt      = dx_out.rt_d;
+assign x_in.rt_addr = dx_out.rt_a;
+assign x_in.rd_addr = dx_out.rd_a;
 
 assign m_in.addr = x_out.alu;
 assign m_in.val  = x_out.rt;
 
 assign wb_in.mem = m_out.val;
 assign wb_in.alu = x_out.alu;
+
+// Stage Buffer Wiring
+
+// struct DX_data {
+//     dx_in.pc <- fetch_decode_buffer
+assign dx_in.rs_a = RegAddr'(0);
+assign dx_in.rs_d = d_out.rs;
+assign dx_in.rt_a = RegAddr'(0);
+assign dx_in.rt_d = d_out.rt;
+assign dx_in.imm  = {{16{instr_i.imm[15]}}, instr_i.imm};
+//}
 
 assign y = m_out.val;
 
@@ -112,6 +134,18 @@ IF fetch(
 	.out(if_out)
 );
 
+FD fetch_decode_buffer(
+	.clk(clk),
+	.rst(rst),
+	.stall(),
+
+	.next_pc_i(if_out.pc),
+	.instr_i(instr),
+
+	.next_pc_o(dx_in.pc),
+	.instr_o(d_in.instr),
+);
+
 D decode(
 	.clk(clk),
 	.reset(reset),
@@ -120,10 +154,39 @@ D decode(
 	.out(d_out)
 );
 
+DX decode_execute_buffer(
+	.clk(clk),
+	.rst(rst),
+
+	.fwdX_rs(),
+	.fwdX_rt(),
+	.fwdM_rs(),
+	.fwdM_rt(),
+	.stall(),
+
+	.M_d(m_out.val),
+	.X_d(x_out.alu),
+
+	.ctrl(dx_ctrl),
+	.data_i(dx_in),
+
+	.xm(xm_ctrl),
+	.x(x_ctrl),
+	.data_o(dx_out)
+);
+
 X execute(
 	.in(x_in),
 	.out(x_out)
 );
+
+XM execute_mem_buffer(
+	.clk(clk),
+	.rst(rst),
+
+	.fwdM_rt
+
+)
 
 M mem(
 	.clk(clk),
@@ -143,140 +206,16 @@ InstROM i_mem(
 
 Controller control(
 	.opCode(opcode),
-	.ALUop(x_op),
-	.aluSrc(alu_src),
-	.reg_write(_reg_write),
-	.read_mem(_mem_read),
-	.write_mem(_mem_write),
-	.memToReg(mem_to_reg),
-	.jmp(jmp),
-	.branch(branch),
-	.reg_dst(reg_dst)
+	.signals(dx_ctrl)
+	// .ALUop(x_op),
+	// .aluSrc(alu_src),
+	// .reg_write(_reg_write),
+	// .read_mem(_mem_read),
+	// .write_mem(_mem_write),
+	// .memToReg(mem_to_reg),
+	// .jmp(jmp),
+	// .branch(branch),
+	// .reg_dst(reg_dst)
 );
 
-
-
-
-// IF fetch(
-//  	.clk(clk),
-//  	.reset(reset),
-// 	.stall(stall),
-// 	.branch(branch),
-// 	.alu_zero(alu_zero),
-// 	.jmp(jmp),
-// 	.pc_branch(_pc_branch),
-// 	.pc_jmp(pc_jmp),
-// 	.pc(pc)
-// );
-// // InstROM Wires
-
-// InstROM i_mem(
-// 	.addr(pc),
-// 	.instr(instr)
-// );
-
-
-// Controller control(
-// 	.opCode(opcode),
-// 	.ALUop(x_op),
-// 	.aluSrc(alu_src),
-// 	.reg_write(_reg_write),
-// 	.read_mem(_mem_read),
-// 	.write_mem(_mem_write),
-// 	.memToReg(mem_to_reg),
-// 	.jmp(jmp),
-// 	.branch(branch),
-// 	.reg_dst(reg_dst)
-// );
-
-// // D Wires
-
-// Register reg_in, rs_out, rt_out;
-
-// D decode(
-// 	.clk(clk),
-// 	.reset(reset),
-
-// 	.ctrl(d_control),
-// 	.in(d_input),
-// 	.out(d_output)
-// );
-
-// // X Wires
-
-
-// wire [31:0] _pc;
-// assign _pc = {24'b0, pc};
-
-// wire [31:0] immediate;
-// assign immediate = {{16{instr_i.imm[15]}}, instr_i.imm};
-
-// wire [31:0] rs_val; assign rs_val = rs_out;
-// wire [31:0] rt_val; assign rt_val = rt_out;
-
-// wire [4:0] rt_addr; assign rt_addr = instr_r.rt;
-// wire [4:0] rd_addr; assign rd_addr = instr_r.rd;
-
-// wire [31:0] pc_branch;
-// assign _pc_branch = pc_branch[7:0];
-
-// wire [31:0] alu_out;
-// wire [31:0] rt_val_out;
-
-// wire [4:0] reg_dst_addr;
-
-// X execute(
-// 	.op(x_op),
-// 	.reg_dst(reg_dst),
-// 	.aluSrc(alu_src),
-// 	.pc(_pc),
-// 	.immediate(immediate),
-// 	.rs_val(rs_val),
-// 	.rt_val(rt_val),
-// 	.rt_addr(rt_addr),
-// 	.rd_addr(rd_addr),
-// 	.zero(alu_zero),
-// 	.pc_branch(pc_branch),
-// 	.alu_out(alu_out),
-// 	.rt_val_out(rt_val_out),
-// 	.reg_dst_addr(reg_dst_addr)
-// );
-
-
-// // M Wires
-// Register mem_addr;
-// assign mem_addr = Register'(alu_out);
-
-// Register mem_in;
-// assign mem_in = Register'(rt_val_out);
-
-// Register mem_out;
-
-// M memory(
-// 	.clk(clk),
-// 	.addr(mem_addr),
-// 	.read(mem_read),
-// 	.write(mem_write),
-// 	.mem_in(mem_in),
-// 	.mem_out(mem_out)
-// );
-
-// // WB Wires
-// wire [31:0] mem_data;
-// assign mem_data = mem_out;
-
-// wire [31:0] alu_data;
-// assign alu_data = alu_out;
-
-// wire [31:0] wb_data;
-// assign reg_in = Register'(wb_data);
-
-// WB writeback(
-// 	.mem_data(mem_data),
-// 	.alu_data(alu_data),
-// 	.memToReg(mem_to_reg),
-// 	.wb_data(wb_data)
-// );
-
-// assign y = ^mem_data;
 endmodule

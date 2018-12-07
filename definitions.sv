@@ -67,17 +67,36 @@ typedef struct packed {
 } JType;
 
 typedef struct packed {
-  // Control signals from control
-  op_code  ALUop;
-  Signal aluSrc;
   Signal reg_write;
+  Signal mem_to_reg;
+} WB_ctrl;
+
+typedef struct packed {
   Signal read_mem;
   Signal write_mem;
-  Signal memToReg;
-  Signal jmp;
   Signal branch;
-  Signal reg_dst;
-} DX_control_bundle;
+  Signal jmp;
+} M_ctrl;
+
+typedef struct packed {
+  WB_ctrl wb;
+} MW_ctrl;
+
+typedef struct packed {
+  op_code alu_op;
+  Signal  alu_src;
+  Signal  reg_dst;
+} X_ctrl;
+
+typedef struct packed {
+  MW_ctrl mw;
+  M_ctrl  m;
+} XM_ctrl;
+
+typedef struct packed {
+  XM_ctrl xm;
+  X_ctrl  x;
+} DX_ctrl;
 
 typedef struct packed {
   // Data from Instruction Decode
@@ -88,7 +107,7 @@ typedef struct packed {
   Register rt_d;
   RegAddr  rd_a;
   Register imm;
-} DX_data_bundle;
+} DX_data;
 
 typedef struct packed {
   Signal         stall;
@@ -138,10 +157,14 @@ typedef struct packed {
 } X_output;
 
 typedef struct packed {
+  Register addr;
+  Register val; 
+} M_data;
+
+typedef struct packed {
   Signal read;
   Signal write;
-  Register addr;
-  Register val;
+  M_data data;
 } M_input;
 
 typedef struct packed {
