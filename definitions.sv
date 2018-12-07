@@ -101,6 +101,7 @@ typedef struct packed {
 typedef struct packed {
   // Data from Instruction Decode
   ProgramCounter pc;
+  ProgramCounter pc_jmp;
   RegAddr  rs_a;
   Register rs_d;
   RegAddr  rt_a;
@@ -127,19 +128,19 @@ typedef struct packed {
 } D_control;
 
 typedef struct packed {
-  Register    rd;
-  Instruction instr;
+  Register       rd;
+  Instruction    instr;
+  ProgramCounter pc;
 } D_input;
 
 typedef struct packed {
-  Register rs;
-  Register rt;
+  Register       rs;
+  Register       rt;
+  ProgramCounter pc_jmp;
 } D_output;
 
 typedef struct packed {
-  op_code         op;
-  logic           reg_dst;
-  logic           alu_src;
+  X_ctrl          ctrl;
   ProgramCounter  pc;
   Register        imm;
   Register        rs;
@@ -174,7 +175,7 @@ typedef struct packed {
 typedef struct packed {
   Register mem;
   Register alu;
-  Signal   src;
+  RegAddr  dst;
 } WB_input;
 
 typedef struct packed {
