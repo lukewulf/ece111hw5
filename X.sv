@@ -5,9 +5,9 @@ module X(
 	output X_output out
 );
 
-assign pc_branch = in.pc + in.imm + 1;
-assign out.dst_addr = in.reg_dst ? in.rd_addr : in.rt_addr;
-assign out.rt = in.rt;
+assign out.pc_branch = in.pc + in.imm + 1;
+assign out.dst_addr  = in.reg_dst ? in.rd_addr : in.rt_addr;
+assign out.rt        = in.rt;
 
 op_code alu_controller_out;
 
