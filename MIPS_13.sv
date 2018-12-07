@@ -99,6 +99,7 @@ assign if_in.pc_branch = x_out.pc_branch;
 assign if_in.pc_jmp    = pc_jmp;
 
 assign d_in.rd    = wb_out.val;
+assign d_in.dst   = wb_out.dst;
 
 assign m_in.data = m_data;
 

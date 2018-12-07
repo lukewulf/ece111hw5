@@ -129,6 +129,7 @@ typedef struct packed {
 
 typedef struct packed {
   Register       rd;
+  RegAddr        dst;
   Instruction    instr;
   ProgramCounter pc;
 } D_input;
@@ -180,6 +181,7 @@ typedef struct packed {
 
 typedef struct packed {
   Register val;
+  RegAddr  dst;
 } WB_output;
 	 
 endpackage // defintions
