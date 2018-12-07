@@ -180,5 +180,27 @@ typedef struct packed {
 typedef struct packed {
   Register val;
 } WB_output;
+
+typedef struct packed{
+  RegAddr Drs;
+  RegAddr Drt;
+  RegAddr Drd;
+  RegAddr Xrs;
+  RegAddr Xrt;
+  RegAddr Xrd;
+  RegAddr Mrs;
+  RegAddr Mrt;
+  RegAddr Mrd;
+} Hazard_input;
+
+typedef struct packed{
+  Signal fwdXX_rs;
+  Signal fwdXX_rt;
+  Signal fwdMX_rs;
+  Signal fwdMX_rt;
+  Signal fwdMM_rt;
+  Signal stallD;
+  Signal stallIF;
+} Hazard_output;
 	 
 endpackage // defintions

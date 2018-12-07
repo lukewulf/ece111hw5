@@ -27,9 +27,9 @@ always_ff @(posedge clk) begin
 	if(stall != DISABLE) begin
 		// Control signals
 		xm <= ctrl.xm;
-    x  <= ctrl.x;
+    		x  <= ctrl.x;
 
-    data_o.pc   <= data_i.pc;
+   		data_o.pc   <= data_i.pc;
 
 		data_o.rs_a <= data_i.rs_a;
 		data_o.rs_d <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : data_i.rs_d;
@@ -41,9 +41,9 @@ always_ff @(posedge clk) begin
 		data_o.imm  <= data_i.imm;
 	end 
 	else begin
-    xm.mw.reg_write <= DISABLE;
-    xm.m.write_mem  <= DISABLE;
-    data_o.rd_a     <= RegAddr'(0);
+    		xm.mw.reg_write <= DISABLE;
+    		xm.m.write_mem  <= DISABLE;
+    		data_o.rd_a     <= RegAddr'(0);
 	end
 end
 

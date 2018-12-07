@@ -77,6 +77,10 @@ WB_input  wb_in;
 WB_output wb_out;
 WB_ctrl   wb_ctrl;
 
+// Hazard Wires
+Hazard_input = h_i;
+Hazard_output = h_o;
+
 // Control Wiring
 assign if_in.stall    = stall;
 assign if_in.branch   = m_ctrl.branch;
@@ -218,4 +222,22 @@ Controller control(
 	// .reg_dst(reg_dst)
 );
 
+Hazard hazard(
+	.Drs(),
+	.Drt(),
+	.Drd(),
+	.Xrs(),
+	.Xrt(),
+	.Xrd(),
+	.Mrs(),
+	.Mrt(),
+	.Mrd(),
+	.fwdXX_rs(),
+	.fwdXX_rt(),
+	.fwdMX_rs(),
+	.fwdMX_rt(),
+	.fwdMM_rt(),
+	.stallD(),
+	.stallIF()
+);
 endmodule
