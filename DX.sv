@@ -1,87 +1,47 @@
 import definitions::*;
 
-module DX(	input wire clk,
-		input wire rst,
-		
-		// Control signals from hazard detection unit
-		input Signal fwdX_rs,
-		input Signal fwdX_rt,
-		input Signal fwdM_rs,
-		input Signal fwdM_rt,
-		input Signal stall,
+module DX(
+  input  wire clk,
+  input  wire rst,
+ 
+  // Control signals from hazard detection unit
+  input  Signal fwdX_rs,
+  input  Signal fwdX_rt,
+  input  Signal fwdM_rs,
+  input  Signal fwdM_rt,
+  input  Signal stall,
 
-		// Forwarded Data
-		input Register X_d,
-		input Register M_d,
+  // Forwarded Data
+  input  Register M_d,
+  input  Register X_d,
 
-		// Control signals from control
-		input wire [1:0]  ALUop,
-		input wire aluSrc,
-		input wire reg_write,
-		input wire read_mem,
-		input wire write_mem,
-		input wire memToReg,
-		input wire jmp,
-		input wire branch,
-		input wire reg_dst,
+  input  DX_control_bundle control_i,
+  output DX_control_bundle control_o,
 
-		// Data from Instruction Decode
-		input ProgramCounter pc,
-		input RegAddr  rs_a,
-		input Register rs_d,
-		input RegAddr  rt_a,
-		input Register rt_d,
-		input RegAddr  rd_a,
-		input wire [31:0] imm,
-
-		// Control signals from control
-		output reg [1:0]  ALUop_o,
-		output reg aluSrc_o,
-		output reg reg_write_o,
-		output reg read_mem_o,
-		output reg write_mem_o,
-		output reg memToReg_o,
-		output reg jmp_o,
-		output reg branch_o,
-		output reg reg_dst_o,
-
-		// Data from Instruction Decode
-		output ProgramCounter pc_o,
-		output RegAddr  rs_a_o,
-		output Register rs_d_o,
-		output RegAddr  rt_a_o,
-		output Register rt_d_o,
-		output RegAddr  rd_a_o,
-		output reg [31:0] imm_o);
+  input  DX_data_bundle data_i,
+  output DX_data_bundle data_o
+);
 
 always_ff @(posedge clk) begin
 	if(stall != DISABLE) begin
 		// Control signals
-		ALUop_o <= ALUop;
-		aluSrc_o <= aluSrc;
-		reg_write_o <= reg_write;
-		read_mem_o <= read_mem;
-		write_mem_o <= write_mem;
-		memToReg_o <= memToReg;
-		jmp_o <= jmp;
-		branch_o <= branch;
-		reg_dst_o <= reg_dst;
+		control_o   <= control_i;
 
-		pc_o <= pc;
-		rs_a_o <= rs_a;
-		rs_d_o <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : rs_d;
+    data_o.pc   <= data_i.pc;
+
+		data_o.rs_a <= data_i.rs_a;
+		data_o.rs_d <= (fwdX_rs == ENABLE) ? X_d : (fwdM_rs == ENABLE) ? M_d : data_i.rs_d;
+		data_o.rt_a <= data_i.rt_a;
+		data_o.rt_d <= (fwdX_rt == ENABLE) ? X_d : (fwdM_rt == ENABLE) ? M_d : data_i.rt_d;
 		
+		data_o.rd_a <= data_i.rd_a;
 
-		rt_a_o <= rt_a;
-		rt_d_o <= (fwdX_rt) ? X_d : (fwdM_rt) ? M_d : rt_d;
-		
-		rd_a_o <= rd_a;
-
-		imm_o <= imm;
+		data_o.imm  <= data_i.imm;
 	end 
 	else begin
-		reg_write_o <= 0;
-		write_mem_o <= 0;
+    control_o.reg_write <= DISABLE;
+    control_o.write_mem <= DISABLE;
+    data_o.rd_a         <= RegAddr'(0);
 	end
 end
 

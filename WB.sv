@@ -1,7 +1,8 @@
-module WB(	input [31:0] mem_data,
-	  	input [31:0] alu_data,
-		input memToReg,
-		output [31:0] wb_data);
+import definitions::*;
+module WB(
+	input  WB_input  in,
+	output WB_output out
+);
 
-	assign wb_data = memToReg ? mem_data : alu_data;
+	assign out.val = in.src ? in.mem : in.alu;
 endmodule

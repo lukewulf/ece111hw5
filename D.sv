@@ -4,41 +4,39 @@ import definitions::*;
 module D(
     input wire        clk,
     input Signal      reset,
-    input Signal      write,
-    input Register    rd_i,
-    input Instruction instr,
 
-    output Register   rs_o,
-    output Register   rt_o
+    input  D_control  ctrl,
+    input  D_input    in,
+    output D_output   out
 );
 
 RegAddr rs, rt, rd;
 
 RType instr_r;
-assign instr_r = RType'(instr);
+assign instr_r = RType'(in.instr);
 
 IType instr_i;
-assign instr_i = IType'(instr);
+assign instr_i = IType'(in.instr);
 
 JType instr_j;
-assign instr_j = JType'(instr);
+assign instr_j = JType'(in.instr);
 
 OpCode [5:0] opcode;
-assign opcode = OpCode'(instr[31:26]);
+assign opcode = OpCode'(in.instr[31:26]);
 
 RegisterFile RF(
     .clk(clk),
     .reset(reset),
 
-    .write(write),
-    .rd_i(rd_i),
+    .write(ctrl.write),
+    .rd_i(in.rd),
 
     .rs(rs),
     .rt(rt),
     .rd(rd),
 
-    .rs_o(rs_o),
-    .rt_o(rt_o)
+    .rs_o(out.rs),
+    .rt_o(out.rt)
 );
 
 always_comb begin

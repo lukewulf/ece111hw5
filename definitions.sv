@@ -1,13 +1,5 @@
 //This file defines the parameters used in the alu
 package definitions;
-    
-// typedef enum logic[1:0] {
-// //Our operations
-//   OR = 2'b00,
-//   AND = 2'b01,
-//   ADD = 2'b10,
-//   SUB = 2'b11
-// } op_code;
 
 typedef enum logic {
   ENABLE  = 1'b1,
@@ -73,5 +65,97 @@ typedef struct packed {
   OpCode   opcode;
   JumpAddr addr;
 } JType;
+
+typedef struct packed {
+  // Control signals from control
+  op_code  ALUop;
+  Signal aluSrc;
+  Signal reg_write;
+  Signal read_mem;
+  Signal write_mem;
+  Signal memToReg;
+  Signal jmp;
+  Signal branch;
+  Signal reg_dst;
+} DX_control_bundle;
+
+typedef struct packed {
+  // Data from Instruction Decode
+  ProgramCounter pc;
+  RegAddr  rs_a;
+  Register rs_d;
+  RegAddr  rt_a;
+  Register rt_d;
+  RegAddr  rd_a;
+  Register imm;
+} DX_data_bundle;
+
+typedef struct packed {
+  Signal         stall;
+  Signal         branch;
+  Signal         alu_zero;
+  Signal         jmp;
+  ProgramCounter pc_branch;
+  ProgramCounter pc_jmp;
+} IF_input;
+
+typedef struct packed {
+  ProgramCounter pc;
+} IF_output;
+
+typedef struct packed {
+  Signal write;
+} D_control;
+
+typedef struct packed {
+  Register    rd;
+  Instruction instr;
+} D_input;
+
+typedef struct packed {
+  Register rs;
+  Register rt;
+} D_output;
+
+typedef struct packed {
+  op_code         op;
+  logic           reg_dst;
+  logic           alu_src;
+  ProgramCounter  pc;
+  Register        imm;
+  Register        rs;
+  Register        rt;
+  RegAddr         rt_addr;
+  RegAddr         rd_addr;
+} X_input;
+
+typedef struct packed {
+  Signal          zero;
+  ProgramCounter  pc_branch;
+  Register        alu;
+  Register        rt;
+  RegAddr         dst_addr;
+} X_output;
+
+typedef struct packed {
+  Signal read;
+  Signal write;
+  Register addr;
+  Register val;
+} M_input;
+
+typedef struct packed {
+  Register val;
+} M_output;
+
+typedef struct packed {
+  Register mem;
+  Register alu;
+  Signal   src;
+} WB_input;
+
+typedef struct packed {
+  Register val;
+} WB_output;
 	 
 endpackage // defintions

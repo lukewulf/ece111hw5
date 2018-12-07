@@ -1,11 +1,8 @@
 import definitions::*;
 module M(
   input  wire     clk,
-  input  Register addr,
-  input  Signal   read,
-  input  Signal   write,
-  input  Register mem_in,
-  output Register mem_out
+  input  M_input  in,
+  output M_output out
 );
 
 Register mem [2**MemAddrWidth];
@@ -16,15 +13,15 @@ initial begin
 end
 
 wire [MemAddrWidth-1:0] _addr;
-assign _addr = addr[MemAddrWidth-1+2:0+2];
+assign _addr = in.addr[MemAddrWidth-1+2:0+2];
 
 always_comb begin
-    if (read == ENABLE) mem_out = mem[_addr];
-    else                mem_out = Register'(32'bZ);
+    if (in.read == ENABLE) out.val = mem[_addr];
+    else                   out.val = Register'(32'bZ);
 end
 
 always_ff @ (posedge clk) begin
-    if (write == ENABLE) mem[_addr] = mem_in;
+    if (in.write == ENABLE) mem[_addr] = in.val;
 end
 
 endmodule
