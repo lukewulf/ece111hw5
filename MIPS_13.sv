@@ -135,7 +135,7 @@ IF fetch(
 FD fetch_decode_buffer(
 	.clk(clk),
 	.rst(rst),
-	.stall(),
+	.stall(h_o.stallF),
 
 	.next_pc_i(if_out.pc),
 	.instr_i(instr),
@@ -156,11 +156,11 @@ DX decode_execute_buffer(
 	.clk(clk),
 	.rst(rst),
 
-	.fwdX_rs(),
-	.fwdX_rt(),
-	.fwdM_rs(),
-	.fwdM_rt(),
-	.stall(),
+	.fwdX_rs(h_o.fwdXX_rs),
+	.fwdX_rt(h_o.fwdXX_rt),
+	.fwdM_rs(h_o.fwdMX_rs),
+	.fwdM_rt(h_o.fwdMX_rt),
+	.stall(h_o.stallD),
 
 	.M_d(m_out.val),
 	.X_d(x_out.alu),
@@ -181,7 +181,7 @@ XM execute_mem_buffer(
 	.clk(clk),
 	.rst(rst),
 
-	.fwdM_rt(),
+	.fwdM_rt(h_o.fwdMM_rt),
 	.M_d(m_out.alu),
 
 	.ctrl(xm_ctrl),
@@ -224,33 +224,10 @@ InstROM i_mem(
 Controller control(
 	.opCode(opcode),
 	.signals(dx_ctrl)
-	// .ALUop(x_op),
-	// .aluSrc(alu_src),
-	// .reg_write(_reg_write),
-	// .read_mem(_mem_read),
-	// .write_mem(_mem_write),
-	// .memToReg(mem_to_reg),
-	// .jmp(jmp),
-	// .branch(branch),
-	// .reg_dst(reg_dst)
 );
 
 Hazard hazard(
-	.Drs(),
-	.Drt(),
-	.Drd(),
-	.Xrs(),
-	.Xrt(),
-	.Xrd(),
-	.Mrs(),
-	.Mrt(),
-	.Mrd(),
-	.fwdXX_rs(),
-	.fwdXX_rt(),
-	.fwdMX_rs(),
-	.fwdMX_rt(),
-	.fwdMM_rt(),
-	.stallD(),
-	.stallIF()
+	.h_i(h_i),
+	.h_o(h_o)
 );
 endmodule
