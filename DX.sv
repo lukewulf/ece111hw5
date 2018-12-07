@@ -31,9 +31,10 @@ always_ff @(posedge clk) begin
 		// Control signals
 		xm <= ctrl.xm;
 
-    x_data.ctrl <= ctrl.x;
-    x_data.op   <= data_i.alu_op;
-    x_data.pc   <= data_i.pc;
+    		x_data.ctrl <= ctrl.x;
+    		x_data.op   <= data_i.alu_op;
+    		x_data.pc   <= data_i.pc;
+
 
 		x_data.rs_a <= data_i.rs_a;
 		x_data.rs_d <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : data_i.rs_d;
@@ -45,9 +46,12 @@ always_ff @(posedge clk) begin
 		x_data.imm  <= data_i.imm;
 	end 
 	else begin
-    xm.mw.reg_write <= DISABLE;
-    xm.m.write_mem  <= DISABLE;
-    x_data.rd_a     <= RegAddr'(0);
+
+
+    		xm.mw.reg_write <= DISABLE;
+    		xm.m.write_mem  <= DISABLE;
+    		x_data.rd_a     <= RegAddr'(0);
+
 	end
 end
 

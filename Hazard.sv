@@ -9,9 +9,9 @@ module Hazard(	input RegAddr Drs,
 		input RegAddr Mrs,
 		input RegAddr Mrt,
 		input RegAddr Mrd,
-		input RegAddr WBrs,
-		input RegAddr WBrt,
-		input RegAddr WBrd,
+		//input RegAddr WBrs,
+		//input RegAddr WBrt,
+		//input RegAddr WBrd,
 		output Signal fwdXX_rs,
 		output Signal fwdXX_rt,
 		output Signal fwdMX_rs,
@@ -20,11 +20,11 @@ module Hazard(	input RegAddr Drs,
 		output Signal stallD,
 		output Signal stallIF);
 
-assign fwdXX_rs = (Drs == 5'b00000) ? DISABLE : (Xrd == Drs) ? ENABLE : DISABLE;
-assign fwdXX_rt = (Drt == 5'b00000) ? DISABLE : (Xrd == Drt) ? ENABLE : DISABLE;
-assign fwdMX_rs = (Drs == 5'b00000) ? DISABLE : (Mrd == Drs) ? ENABLE : DISABLE;
-assign fwdMX_rt = (Drt == 5'b00000) ? DISABLE : (Mrd == Drt) ? ENABLE : DISABLE;
-assign fwdMM_rt = (Xrt == 5'b00000) ? DISABLE : (Mrd == Xrt) ? ENABLE : DISABLE;
-assign stallD = (Mrd == 5'b00000) ? DISABLE : (Mrd == Drs || Mrd == Drt) ? ENABLE : DISABLE;
+assign fwdXX_rs = (Drs == 5'bZZZZZ) ? DISABLE : (Xrd == Drs) ? ENABLE : DISABLE;
+assign fwdXX_rt = (Drt == 5'bZZZZZ) ? DISABLE : (Xrd == Drt) ? ENABLE : DISABLE;
+assign fwdMX_rs = (Drs == 5'bZZZZZ) ? DISABLE : (Mrd == Drs) ? ENABLE : DISABLE;
+assign fwdMX_rt = (Drt == 5'bZZZZZ) ? DISABLE : (Mrd == Drt) ? ENABLE : DISABLE;
+assign fwdMM_rt = (Xrt == 5'bZZZZZ) ? DISABLE : (Mrd == Xrt) ? ENABLE : DISABLE;
+assign stallD = (Mrd == 5'bZZZZZ) ? DISABLE : (Mrd == Drs || Mrd == Drt) ? ENABLE : DISABLE;
 assign stallF = stallD; 
 endmodule
