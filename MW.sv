@@ -12,8 +12,14 @@ module MW(
 );
 
 	always_ff @(posedge clk) begin
-		wb_ctrl <= ctrl.wb;
-		wb_data <= data_i;
+		if(rst) begin
+			wb_ctrl <= WB_ctrl'(0);
+			wb_data <= WB_input'(0);
+		end
+		else begin
+			wb_ctrl <= ctrl.wb;
+			wb_data <= data_i;
+		end
 	end
 	
 endmodule
