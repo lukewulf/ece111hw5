@@ -37,7 +37,7 @@ RegisterFile RF(
 
     .rs(rs),
     .rt(rt),
-    .rd(rd),
+    .rd(in.dst),
 
     .rs_o(out.rs),
     .rt_o(out.rt)

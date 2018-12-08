@@ -1,4 +1,4 @@
-import definitions::*;
+ import definitions::*;
 
 module X(
 	input  X_input  in,
@@ -6,10 +6,10 @@ module X(
 );
 
 assign out.pc_branch = in.pc + in.imm + 1;
-assign out.dst_addr  = in.ctrl.reg_dst ? in.rd_addr : in.rt_addr;
+assign out.dst_addr  = in.rd_addr;
 assign out.rt        = in.rt;
 
-op_code alu_controller_out;
+alu_operation alu_controller_out;
 
 wire [31:0] alu_b = in.ctrl.alu_src ? in.imm : in.rt;
 

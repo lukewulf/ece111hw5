@@ -4,7 +4,7 @@ import definitions::*;
 
 logic msb;
 logic [2:0] opCode;
-wire op_code ALUop;
+wire alu_control_signals ALUop;
 wire reg_write;
 wire set;
 wire bne;

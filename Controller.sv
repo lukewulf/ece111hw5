@@ -13,7 +13,7 @@ module Controller(
 	output DX_ctrl signals
 );
 
-op_code ALUop;		//ALU operation to send to ALU
+alu_control_signals ALUop;		//ALU operation to send to ALU
 Signal aluSrc;
 Signal reg_dst;		//Control to Choose which reg to write to
 
@@ -24,14 +24,20 @@ Signal memToReg;		//Control to choose between memory and ALU output
 Signal jmp;		//Control to Jump
 Signal branch;
 
-WB_ctrl wb_ctrl = { reg_write, memToReg };
-M_ctrl m_ctrl = { read_mem, write_mem, branch, jmp };
-MW_ctrl mw_ctrl = { wb_ctrl };
+WB_ctrl wb_ctrl;
+assign wb_ctrl = { reg_write, memToReg };
+M_ctrl m_ctrl;
+assign m_ctrl = { read_mem, write_mem, branch, jmp };
+MW_ctrl mw_ctrl;
+assign mw_ctrl = { wb_ctrl };
 
-X_ctrl x_ctrl = { ALUop, aluSrc, reg_dst };
-XM_ctrl xm_ctrl = { mw_ctrl, m_ctrl };
+X_ctrl x_ctrl;
+assign x_ctrl = { ALUop, aluSrc, reg_dst };
+XM_ctrl xm_ctrl;
+assign xm_ctrl = { mw_ctrl, m_ctrl };
 
-DX_ctrl dx_ctrl = { xm_ctrl, x_ctrl };
+DX_ctrl dx_ctrl;
+assign dx_ctrl = { xm_ctrl, x_ctrl };
 
 assign signals = dx_ctrl;
 
@@ -41,7 +47,7 @@ always_comb								  // no registers, no clocks
 
 		// ADD, SUB, AND, OR
 		6'b00_0000: begin		// R Type
-				ALUop = ALU_ADD;			
+				ALUop = ALU_RTYPE;			
 				aluSrc = DISABLE;
 				reg_write = ENABLE;		// writing to a register
 				read_mem = DISABLE;		// reading from mem
@@ -53,7 +59,7 @@ always_comb								  // no registers, no clocks
 			end
 		// ADDI
 		6'b00_1000: begin	
-				ALUop = ALU_SUB;			
+				ALUop = ALU_ADD;			
 				aluSrc = ENABLE;
 				reg_write = ENABLE;		
 				read_mem = DISABLE;		
@@ -65,7 +71,7 @@ always_comb								  // no registers, no clocks
 			end
 		// BEQ
 		6'b00_0100: begin	
-				ALUop = ALU_AND;				
+				ALUop = ALU_SUB;				
 				aluSrc = DISABLE;
 				reg_write = DISABLE;		
 				read_mem = DISABLE;		
@@ -77,7 +83,7 @@ always_comb								  // no registers, no clocks
 			end
 		// LW
 		6'b10_0011: begin					
-				ALUop = ALU_SUB;		
+				ALUop = ALU_ADD;		
 				aluSrc = ENABLE;
 				reg_write = ENABLE;		
 				read_mem = ENABLE;		
@@ -90,7 +96,7 @@ always_comb								  // no registers, no clocks
 			end
 		// SW
 		6'b10_1011: begin					
-				ALUop = ALU_SUB;		
+				ALUop = ALU_ADD;		
 				aluSrc = ENABLE;
 				reg_write = DISABLE;		
 				read_mem = DISABLE;		

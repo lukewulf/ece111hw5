@@ -1,8 +1,8 @@
 import definitions::*;
 
 module ALU_Controller(	input [5:0] func,
-			input [1:0] op,
-			output op_code alu_op);
+			input alu_control_signals op,
+			output alu_operation alu_op);
 	
 always_comb
 begin
@@ -11,23 +11,23 @@ begin
 		begin
 			case(func)
 				// Add
-				6'b10_0000: alu_op = ALU_ADD;
+				6'b10_0000: alu_op = ALU_O_ADD;
 				// Sub
-				6'b10_0010: alu_op = ALU_SUB;
+				6'b10_0010: alu_op = ALU_O_SUB;
 				// And
-				6'b10_0100: alu_op = ALU_AND;
+				6'b10_0100: alu_op = ALU_O_AND;
 				// Or
-				6'b10_0101: alu_op = ALU_OR;
+				6'b10_0101: alu_op = ALU_O_OR;
 			endcase
 		end
 		2'b01:		// I Type Add -> ADD
 		begin
-			alu_op = ALU_ADD;
+			alu_op = ALU_O_ADD;
 		end
 
 		2'b10:		// BEQ -> SUB
 		begin
-			alu_op = ALU_SUB;
+			alu_op = ALU_O_SUB;
 		end
 
 		default:

@@ -22,7 +22,7 @@ module XM(	input wire clk,
 always_ff @ (posedge clk) begin
 	mw_ctrl     <= ctrl.mw;
 	m_ctrl      <= ctrl.m;
-	m_data.dst  <= x_out.dst_addr;
+	m_data.dst  <= (rst) ? RegAddr'(0) : x_out.dst_addr;
 	m_data.addr <= x_out.alu;
 	m_data.val  <= (fwdM_rt == ENABLE) ? M_d : x_out.rt;
 end

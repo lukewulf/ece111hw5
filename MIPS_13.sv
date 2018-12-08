@@ -12,7 +12,7 @@ assign reset = Signal'(rst);
 
 // Control Wires
 Signal stall;
-wire [5:0] opcode = instr_r.opcode;
+wire [5:0] opcode = d_in.instr[31:26];
 wire [1:0] x_op;
 wire reg_dst;
 wire alu_src;
@@ -56,7 +56,7 @@ D_output  d_out;
 DX_ctrl dx_ctrl;
 
 DX_data dx_in;
-DX_data dx_out;
+//DX_data dx_out;
 
 // Execute Wires
 X_input  x_in;
@@ -84,7 +84,7 @@ Hazard_input h_i;
 Hazard_output h_o;
 
 // Control Wiring
-assign if_in.stall    = stall;
+assign if_in.stall    = h_o.stallIF;
 assign if_in.branch   = m_ctrl.branch;
 assign if_in.jmp      = m_ctrl.jmp;
 
@@ -120,7 +120,7 @@ assign dx_in.rs_d   = d_out.rs;
 assign dx_in.rt_a   = d_out.rt_a;
 assign dx_in.rt_d   = d_out.rt;
 assign dx_in.rd_a   = d_out.rd_a;
-assign dx_in.imm    = {{16{instr_i.imm[15]}}, instr_i.imm};
+assign dx_in.imm    = {{16{d_in.instr[15]}}, d_in.instr[15:0]};
 assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
 
@@ -129,9 +129,9 @@ assign h_i.Drs = d_out.rs_a;  //    RegAddr Drs
 assign h_i.Drt = d_out.rt_a;  //    RegAddr Drt
 assign h_i.Drd = d_out.rd_a;  //    RegAddr Drd
 
-assign h_i.Xrs = dx_out.rs_a;  //   RegAddr Xrs;
-assign h_i.Xrt = dx_out.rt_a;  //   RegAddr Xrt;
-assign h_i.Xrd = dx_out.rd_a;  //   RegAddr Xrd;
+assign h_i.Xrs = x_in.rs_addr;  //   RegAddr Xrs;
+assign h_i.Xrt = x_in.rt_addr;  //   RegAddr Xrt;
+assign h_i.Xrd = x_in.rd_addr;  //   RegAddr Xrd;
 
 assign h_i.Mrd = m_data.dst;   //   RegAddr Mrd;
 // }
@@ -153,7 +153,7 @@ FD fetch_decode_buffer(
 	.next_pc_i(if_out.pc),
 	.instr_i(instr),
 
-	.next_pc_o(d_in.pc),
+	.next_pc_o(dx_in.pc),
 	.instr_o(d_in.instr)
 );
 

@@ -23,11 +23,18 @@ typedef enum logic[5:0]{
 } OpCode;
 
 typedef enum logic[1:0]{
-  ALU_ADD = 2'b00,
-  ALU_SUB = 2'b01,
-  ALU_AND = 2'b10,
-  ALU_OR = 2'b11
-} op_code;
+  ALU_RTYPE = 2'b00,
+  ALU_ADD = 2'b01,
+  ALU_SUB = 2'b10,
+  ALU_DC = 2'b11
+} alu_control_signals;
+
+typedef enum logic[1:0]{
+  ALU_O_ADD = 2'b00,
+  ALU_O_SUB = 2'b01,
+  ALU_O_AND = 2'b10,
+  ALU_O_OR = 2'b11
+} alu_operation;
 
 typedef enum logic[5:0]{
   ADD = 6'h20,
@@ -83,7 +90,7 @@ typedef struct packed {
 } MW_ctrl;
 
 typedef struct packed {
-  op_code alu_op;
+  alu_control_signals alu_op;
   Signal  alu_src;
   Signal  reg_dst;
 } X_ctrl;
