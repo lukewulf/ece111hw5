@@ -5,11 +5,11 @@ module Hazard(
 	output Hazard_output h_o
 );
 
-assign h_o.fwdXX_rs = (h_i.Drs == 5'b0) ? DISABLE : (h_i.Xrd == h_i.Drs) ? ENABLE : DISABLE;
-assign h_o.fwdXX_rt = (h_i.Drt == 5'b0) ? DISABLE : (h_i.Xrd == h_i.Drt) ? ENABLE : DISABLE;
-assign h_o.fwdMX_rs = (h_i.Drs == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drs) ? ENABLE : DISABLE;
-assign h_o.fwdMX_rt = (h_i.Drt == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
-assign h_o.fwdMM_rt = (h_i.Xrt == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Xrt) ? ENABLE : DISABLE;
+assign h_o.fwdXX_rs = (h_i.Xrd == 5'b0) ? DISABLE : (h_i.Xrd == h_i.Drs) ? ENABLE : DISABLE;
+assign h_o.fwdXX_rt = (h_i.Xrd == 5'b0) ? DISABLE : (h_i.Xrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.fwdMX_rs = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drs) ? ENABLE : DISABLE;
+assign h_o.fwdMX_rt = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.fwdMM_rt = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Xrt) ? ENABLE : DISABLE;
 assign h_o.stallD   = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drs || h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
 /*
 assign h_o.fwdXX_rs = DISABLE;

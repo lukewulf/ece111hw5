@@ -8,6 +8,7 @@ module X(
 assign out.pc_branch = in.pc + in.imm + 1;
 assign out.dst_addr  = in.rd_addr;
 assign out.rt        = in.rt;
+assign out.rt_addr   = in.rt_addr;
 
 alu_operation alu_controller_out;
 

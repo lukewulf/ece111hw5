@@ -56,7 +56,7 @@ D_output  d_out;
 DX_ctrl dx_ctrl;
 
 DX_data dx_in;
-//DX_data dx_out;
+X_input dx_out;
 
 // Execute Wires
 X_input  x_in;
@@ -93,8 +93,8 @@ assign d_ctrl.write = wb_ctrl.reg_write;
 // assign x_in.reg_dst = x_ctrl.reg_dst;
 // assign x_in.alu_src = x_ctrl.alu_src;
 
-assign m_in.read  = m_ctrl.read_mem;
-assign m_in.write = m_ctrl.write_mem;
+// assign m_in.read  = m_ctrl.read_mem;
+// assign m_in.write = m_ctrl.write_mem;
 
 // assign wb_in.src = wb_ctrl.mem_to_reg;
 
@@ -105,7 +105,7 @@ assign if_in.pc_branch = x_out.pc_branch;
 assign d_in.rd    = wb_out.val;
 assign d_in.dst   = wb_out.dst;
 
-assign m_in.data = m_data;
+// assign m_in.data = m_data;
 
 assign mw_data.mem = m_out.val;
 assign mw_data.alu = m_data.addr;
@@ -125,15 +125,13 @@ assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
 
 // struct Hazard_input {
-assign h_i.Drs = d_out.rs_a;  //    RegAddr Drs
-assign h_i.Drt = d_out.rt_a;  //    RegAddr Drt
-assign h_i.Drd = d_out.rd_a;  //    RegAddr Drd
+assign h_i.Drs = dx_out.rs_addr;    //   RegAddr Drs
+assign h_i.Drt = dx_out.rt_addr;    //   RegAddr Drt
 
-assign h_i.Xrs = x_in.rs_addr;  //   RegAddr Xrs;
-assign h_i.Xrt = x_in.rt_addr;  //   RegAddr Xrt;
-assign h_i.Xrd = x_in.rd_addr;  //   RegAddr Xrd;
+// assign h_i.Xrt = x_in.rt_addr;  //   RegAddr Xrt;
+assign h_i.Xrd = m_data.dst;  //   RegAddr Xrd;
 
-assign h_i.Mrd = m_data.dst;   //   RegAddr Mrd;
+assign h_i.Mrd = wb_in.dst;    //   RegAddr Mrd;
 // }
 
 assign y = m_out.val;
@@ -143,6 +141,11 @@ IF fetch(
 	.reset(reset),
 	.in(if_in),
 	.out(if_out)
+);
+
+InstROM i_mem(
+	.addr(if_out.pc),
+	.instr(instr)
 );
 
 FD fetch_decode_buffer(
@@ -165,25 +168,37 @@ D decode(
 	.out(d_out)
 );
 
+Controller control(
+	.opCode(opcode),
+	.signals(dx_ctrl)
+);
+
 DX decode_execute_buffer(
 	.clk(clk),
 	.rst(rst),
 
-	.fwdX_rs(h_o.fwdXX_rs),
-	.fwdX_rt(h_o.fwdXX_rt),
-	.fwdM_rs(h_o.fwdMX_rs),
-	.fwdM_rt(h_o.fwdMX_rt),
 	.stall(h_o.stallD),
-
-	.M_d(m_out.val),
-	.X_d(x_out.alu),
 
 	.ctrl(dx_ctrl),
 	.data_i(dx_in),
 
 	.pc_jmp(if_in.pc_jmp),
 	.xm_ctrl(xm_ctrl),
-	.x_data(x_in)
+	.x_data(dx_out)
+);
+
+DXForwarding dx_forward(
+	.stall(h_o.stallD),
+	.fwdX_rs(h_o.fwdXX_rs),
+	.fwdX_rt(h_o.fwdXX_rt),
+	.fwdM_rs(h_o.fwdMX_rs),
+	.fwdM_rt(h_o.fwdMX_rt),
+
+	.M_d(wb_in.mem),
+	.X_d(m_data.addr),
+
+	.dx_out(dx_out),
+	.x_in(x_in)
 );
 
 X execute(
@@ -195,16 +210,25 @@ XM execute_mem_buffer(
 	.clk(clk),
 	.rst(rst),
 
-	.fwdM_rt(h_o.fwdMM_rt),
-	.M_d(m_out.val),
-
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
 
 	.mw_ctrl(mw_ctrl),
 	.m_ctrl(m_ctrl),
 
-	.m_data(m_data)
+	.m_data(m_data),
+	.m_src(h_i.Xrt)
+);
+
+XMForwarding xm_forward(
+	.fwdM_rt(h_o.fwdMM_rt),
+	.M_d(wb_in.mem),
+
+	.m_data(m_data),
+	.read_mem(m_ctrl.read_mem),
+	.write_mem(m_ctrl.write_mem),
+
+	.m_in(m_in)
 );
 
 M mem(
@@ -228,16 +252,6 @@ WB writeback(
 	.ctrl(wb_ctrl),
 	.in(wb_in),
 	.out(wb_out)
-);
-
-InstROM i_mem(
-	.addr(if_out.pc),
-	.instr(instr)
-);
-
-Controller control(
-	.opCode(opcode),
-	.signals(dx_ctrl)
 );
 
 Hazard hazard(

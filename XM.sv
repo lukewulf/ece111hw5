@@ -2,10 +2,6 @@ import definitions::*;
 
 module XM(	input wire clk,
 		input wire rst,
-		
-		input Signal fwdM_rt,
-
-		input Register M_d,
 
 		input XM_ctrl ctrl,
 
@@ -16,7 +12,8 @@ module XM(	input wire clk,
 		output MW_ctrl mw_ctrl,
 		output M_ctrl  m_ctrl,
 
-		output M_data  m_data
+		output M_data  m_data,
+		output RegAddr m_src
 );
 
 always_ff @ (posedge clk) begin
@@ -24,7 +21,8 @@ always_ff @ (posedge clk) begin
 	m_ctrl      <= ctrl.m;
 	m_data.dst  <= (rst) ? RegAddr'(0) : x_out.dst_addr;
 	m_data.addr <= x_out.alu;
-	m_data.val  <= (fwdM_rt == ENABLE) ? M_d : x_out.rt;
+	m_data.val  <= x_out.rt;
+	m_src       <= x_out.rt_addr;
 end
 
 endmodule

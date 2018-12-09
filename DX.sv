@@ -3,17 +3,8 @@ import definitions::*;
 module DX(
   input  wire clk,
   input  wire rst,
- 
-  // Control signals from hazard detection unit
-  input  Signal fwdX_rs,
-  input  Signal fwdX_rt,
-  input  Signal fwdM_rs,
-  input  Signal fwdM_rt,
-  input  Signal stall,
 
-  // Forwarded Data
-  input  Register M_d,
-  input  Register X_d,
+  input  Signal stall,
 
   input  DX_ctrl ctrl,
   input  DX_data data_i,
@@ -24,40 +15,30 @@ module DX(
 );
 
 always_ff @(posedge clk) begin
-	if(rst) begin
-		pc_jmp <= ProgramCounter'(0);
-		xm_ctrl <= XM_ctrl'(0);
-		x_data <= X_input'(0);
-	end
-	else begin
-  		pc_jmp    <= data_i.pc_jmp;
-		x_data.rs <= (fwdX_rs) ? X_d : (fwdM_rs) ? M_d : data_i.rs_d;
-		x_data.rt <= (fwdX_rt) ? X_d : (fwdM_rt) ? M_d : data_i.rt_d;
-
-		if(stall == DISABLE) begin
-			// Control signals
-    			xm_ctrl <= ctrl.xm;
-	
-   			x_data.ctrl <= ctrl.x;
-    			x_data.pc   <= data_i.pc;
-	
-
-			x_data.rs_addr <= data_i.rs_a;
-
-			x_data.rt_addr <= data_i.rt_a;
-		
-			x_data.rd_addr <= data_i.rd_a;
-
-			x_data.imm  <= data_i.imm;
-		end 
-		else begin
-    			xm_ctrl.mw.wb.reg_write <= DISABLE;
-			xm_ctrl.m.write_mem     <= DISABLE;
-//    			x_data.rs_addr          <= RegAddr'(5'b0);
-//    			x_data.rt_addr          <= RegAddr'(5'b0);
-    			x_data.rd_addr          <= RegAddr'(5'b0);
-		end
-	end
+  if(rst) begin
+    pc_jmp  <= ProgramCounter'(0);
+    xm_ctrl <= XM_ctrl'(0);
+    x_data  <= X_input'(0);
+  end
+  else if (stall) begin
+    pc_jmp  <= pc_jmp;
+    xm_ctrl <= xm_ctrl;
+    x_data  <= x_data;
+  end
+  else begin
+    pc_jmp         <= data_i.pc_jmp;
+    
+    // Control signals
+    xm_ctrl        <= ctrl.xm;
+    x_data.ctrl    <= ctrl.x;
+    x_data.pc      <= data_i.pc;
+    x_data.rs      <= data_i.rs_d;
+    x_data.rt      <= data_i.rt_d;
+    x_data.rs_addr <= data_i.rs_a;
+    x_data.rt_addr <= data_i.rt_a;
+    x_data.rd_addr <= data_i.rd_a;
+    x_data.imm     <= data_i.imm;
+  end
 end
 
 endmodule

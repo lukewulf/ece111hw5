@@ -166,6 +166,7 @@ typedef struct packed {
   ProgramCounter  pc_branch;
   Register        alu;
   Register        rt;
+  RegAddr         rt_addr;
   RegAddr         dst_addr;
 } X_output;
 
