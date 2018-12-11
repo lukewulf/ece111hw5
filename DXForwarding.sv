@@ -19,8 +19,11 @@ module DXForwarding(
 );
 
 X_input _x_in;
-assign x_in = (stall) ? X_input'(0) : _x_in;
-assign xm_ctrl = (stall) ? XM_ctrl'(0) : dx_xm_ctrl;
+//assign x_in = (stall) ? X_input'(0) : _x_in;
+//assign xm_ctrl = (stall) ? XM_ctrl'(0) : dx_xm_ctrl;
+
+assign x_in = _x_in;
+assign xm_ctrl = dx_xm_ctrl;
 
 assign _x_in.ctrl    = dx_out.ctrl;
 assign _x_in.pc      = dx_out.pc;

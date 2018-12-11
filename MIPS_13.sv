@@ -132,6 +132,7 @@ assign h_i.Drt = dx_out.rt_addr;    //   RegAddr Drt
 // assign h_i.Xrt = x_in.rt_addr;  //   RegAddr Xrt;
 // assign h_i.read_mem = m_ctrl.read_mem;
 assign h_i.Xrd = m_data.dst;  //   RegAddr Xrd;
+assign h_i.read_mem = m_ctrl.read_mem;
 
 assign h_i.Mrd = wb_in.dst;    //   RegAddr Mrd;
 // }
@@ -189,6 +190,9 @@ DX decode_execute_buffer(
 	.x_data(dx_out)
 );
 
+Register m_d_forward;
+assign m_d_forward = (wb_ctrl.mem_to_reg == ENABLE) ? wb_in.mem : wb_in.alu;
+
 DXForwarding dx_forward(
 	.stall(h_o.stallD),
 	.fwdX_rs(h_o.fwdXX_rs),
@@ -196,7 +200,7 @@ DXForwarding dx_forward(
 	.fwdM_rs(h_o.fwdMX_rs),
 	.fwdM_rt(h_o.fwdMX_rt),
 
-	.M_d(wb_in.mem),
+	.M_d(m_d_forward),
 	.X_d(m_data.addr),
 
 	.dx_out(dx_out),
