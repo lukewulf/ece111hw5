@@ -16,6 +16,11 @@ assign out.rs_a = rs;
 assign out.rt_a = rt;
 assign out.rd_a = rd;
 
+Register rf_rs, rf_rt;
+
+assign out.rs   = (in.dst == rs) ? in.rd : rf_rs;
+assign out.rt   = (in.dst == rt) ? in.rd : rf_rt;
+
 RType instr_r;
 assign instr_r = RType'(in.instr);
 
@@ -39,8 +44,8 @@ RegisterFile RF(
     .rt(rt),
     .rd(in.dst),
 
-    .rs_o(out.rs),
-    .rt_o(out.rt)
+    .rs_o(rf_rs),
+    .rt_o(rf_rt)
 );
 
 always_comb begin

@@ -207,6 +207,7 @@ typedef struct packed{
   RegAddr Mrs;
   RegAddr Mrt;
   RegAddr Mrd;
+  // Signal  read_mem;
 } Hazard_input;
 
 typedef struct packed{

@@ -54,6 +54,7 @@ D_control d_ctrl;
 D_input   d_in;
 D_output  d_out;
 DX_ctrl dx_ctrl;
+XM_ctrl dx_xm_ctrl;
 
 DX_data dx_in;
 X_input dx_out;
@@ -129,6 +130,7 @@ assign h_i.Drs = dx_out.rs_addr;    //   RegAddr Drs
 assign h_i.Drt = dx_out.rt_addr;    //   RegAddr Drt
 
 // assign h_i.Xrt = x_in.rt_addr;  //   RegAddr Xrt;
+// assign h_i.read_mem = m_ctrl.read_mem;
 assign h_i.Xrd = m_data.dst;  //   RegAddr Xrd;
 
 assign h_i.Mrd = wb_in.dst;    //   RegAddr Mrd;
@@ -183,7 +185,7 @@ DX decode_execute_buffer(
 	.data_i(dx_in),
 
 	.pc_jmp(if_in.pc_jmp),
-	.xm_ctrl(xm_ctrl),
+	.xm_ctrl(dx_xm_ctrl),
 	.x_data(dx_out)
 );
 
@@ -198,6 +200,8 @@ DXForwarding dx_forward(
 	.X_d(m_data.addr),
 
 	.dx_out(dx_out),
+	.dx_xm_ctrl(dx_xm_ctrl),
+	.xm_ctrl(xm_ctrl),
 	.x_in(x_in)
 );
 
@@ -222,7 +226,7 @@ XM execute_mem_buffer(
 
 XMForwarding xm_forward(
 	.fwdM_rt(h_o.fwdMM_rt),
-	.M_d(wb_in.mem),
+	.M_d(wb_out.val),
 
 	.m_data(m_data),
 	.read_mem(m_ctrl.read_mem),

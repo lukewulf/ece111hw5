@@ -12,12 +12,15 @@ module DXForwarding(
   input  Register X_d,
 
   input  X_input dx_out,
+  input  XM_ctrl dx_xm_ctrl,
 
-  output X_input x_in
+  output X_input x_in,
+  output XM_ctrl xm_ctrl
 );
 
 X_input _x_in;
 assign x_in = (stall) ? X_input'(0) : _x_in;
+assign xm_ctrl = (stall) ? XM_ctrl'(0) : dx_xm_ctrl;
 
 assign _x_in.ctrl    = dx_out.ctrl;
 assign _x_in.pc      = dx_out.pc;
