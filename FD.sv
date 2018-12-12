@@ -15,7 +15,11 @@ module FD(
 always_ff@(posedge clk) begin
 	if(stall == DISABLE) begin
 		next_pc_o <= next_pc_i;
-		instr_o <= instr_i;
+		instr_o   <= instr_i;
+	end
+	else begin
+		next_pc_o <= next_pc_o;
+		instr_o   <= instr_o;
 	end
 end
 

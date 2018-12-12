@@ -174,6 +174,8 @@ typedef struct packed {
   Register addr;
   Register val; 
   RegAddr  dst;
+  Signal   alu_zero;
+  ProgramCounter pc_branch;
 } M_data;
 
 typedef struct packed {

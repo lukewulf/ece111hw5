@@ -5,6 +5,7 @@ module DX(
   input  wire rst,
 
   input  Signal stall,
+  input  Signal bubble,
 
   input  DX_ctrl ctrl,
   input  DX_data data_i,
@@ -15,7 +16,7 @@ module DX(
 );
 
 always_ff @(posedge clk) begin
-  if(rst) begin
+  if(rst | bubble) begin
     pc_jmp  <= ProgramCounter'(0);
     xm_ctrl <= XM_ctrl'(0);
     x_data  <= X_input'(0);

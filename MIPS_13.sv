@@ -57,7 +57,9 @@ DX_ctrl dx_ctrl;
 XM_ctrl dx_xm_ctrl;
 
 DX_data dx_in;
+Signal dx_bubble;
 X_input dx_out;
+ProgramCounter dx_pc_jmp;
 
 // Execute Wires
 X_input  x_in;
@@ -71,6 +73,7 @@ M_input  m_in;
 M_output m_out;
 M_ctrl m_ctrl;
 M_data m_data;
+ProgramCounter xm_pc_jmp;
 
 MW_ctrl  mw_ctrl;
 WB_input mw_data;
@@ -100,8 +103,9 @@ assign d_ctrl.write = wb_ctrl.reg_write;
 // assign wb_in.src = wb_ctrl.mem_to_reg;
 
 // Interstage Wiring
-assign if_in.alu_zero  = x_out.zero;
-assign if_in.pc_branch = x_out.pc_branch;
+assign if_in.alu_zero  = m_data.alu_zero;
+assign if_in.pc_branch = m_data.pc_branch;
+assign if_in.pc_jmp    = xm_pc_jmp;
 
 assign d_in.rd    = wb_out.val;
 assign d_in.dst   = wb_out.dst;
@@ -113,6 +117,9 @@ assign mw_data.alu = m_data.addr;
 assign mw_data.dst = m_data.dst;
 
 // Stage Buffer Wiring
+
+assign dx_bubble = (if_in.jmp | (if_in.branch & if_in.alu_zero)) ? ENABLE : DISABLE;
+// assign dx_bubble = DISABLE;
 
 // struct DX_data {
 //     dx_in.pc     <- fetch_decode_buffer
@@ -181,11 +188,12 @@ DX decode_execute_buffer(
 	.rst(rst),
 
 	.stall(h_o.stallD),
+	.bubble(dx_bubble),
 
 	.ctrl(dx_ctrl),
 	.data_i(dx_in),
 
-	.pc_jmp(if_in.pc_jmp),
+	.pc_jmp(dx_pc_jmp),
 	.xm_ctrl(dx_xm_ctrl),
 	.x_data(dx_out)
 );
@@ -194,7 +202,7 @@ Register m_d_forward;
 assign m_d_forward = (wb_ctrl.mem_to_reg == ENABLE) ? wb_in.mem : wb_in.alu;
 
 DXForwarding dx_forward(
-	.stall(h_o.stallD),
+	.bubble(dx_bubble),
 	.fwdX_rs(h_o.fwdXX_rs),
 	.fwdX_rt(h_o.fwdXX_rt),
 	.fwdM_rs(h_o.fwdMX_rs),
@@ -220,12 +228,14 @@ XM execute_mem_buffer(
 
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
+	.pc_jmp(dx_pc_jmp),
 
 	.mw_ctrl(mw_ctrl),
 	.m_ctrl(m_ctrl),
 
 	.m_data(m_data),
-	.m_src(h_i.Xrt)
+	.m_src(h_i.Xrt),
+	.pc_jmp_o(xm_pc_jmp)
 );
 
 XMForwarding xm_forward(

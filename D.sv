@@ -49,7 +49,7 @@ RegisterFile RF(
 );
 
 always_comb begin
-    out.pc_jmp <= ProgramCounter'({ in.pc[31:27], in.instr[25:0], 2'b0 });
+    out.pc_jmp <= ProgramCounter'(in.instr[7:0]);
     case(opcode)
         RTYPE: begin  //  R[rd] = R[rs] + R[rt] 
             rs    = instr_r.rs;
