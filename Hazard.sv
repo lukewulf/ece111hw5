@@ -11,7 +11,7 @@ assign h_o.fwdMX_rs = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drs) ? ENABL
 assign h_o.fwdMX_rt = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
 //assign h_o.fwdMM_rt = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.Mrd == h_i.Xrt) ? ENABLE : DISABLE;
 assign h_o.fwdMM_rt = DISABLE;
-assign h_o.stallD   = (h_i.Mrd == 5'b0) ? DISABLE : (h_i.read_mem == DISABLE) ? DISABLE : (h_i.Mrd == h_i.Drs || h_i.Mrd == h_i.Drt) ? ENABLE : DISABLE;
+assign h_o.stallD   = (h_i.Xrd == 5'b0) ? DISABLE : (h_i.read_mem == DISABLE) ? DISABLE : (h_i.Xrd == h_i.Drs || h_i.Xrd == h_i.Drt) ? ENABLE : DISABLE;
 // assign h_o.stallD   = (h_i.Xrd == 5'b0 | ~h_i.read_mem) ? DISABLE : (h_i.Xrd == h_i.Drs || h_i.Xrd == h_i.Drt) ? ENABLE : DISABLE;
 /*
 assign h_o.fwdXX_rs = DISABLE;

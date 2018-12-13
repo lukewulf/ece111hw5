@@ -162,6 +162,7 @@ FD fetch_decode_buffer(
 	.clk(clk),
 	.rst(rst),
 	.stall(h_o.stallIF),
+	.bubble(dx_bubble),
 
 	.next_pc_i(if_out.pc),
 	.instr_i(instr),
@@ -225,7 +226,7 @@ X execute(
 XM execute_mem_buffer(
 	.clk(clk),
 	.rst(rst),
-
+	.bubble(dx_bubble),
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
 	.pc_jmp(dx_pc_jmp),

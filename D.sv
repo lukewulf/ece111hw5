@@ -18,8 +18,8 @@ assign out.rd_a = rd;
 
 Register rf_rs, rf_rt;
 
-assign out.rs   = (in.dst == rs) ? in.rd : rf_rs;
-assign out.rt   = (in.dst == rt) ? in.rd : rf_rt;
+assign out.rs   = (in.dst == rs && ctrl.write) ? in.rd : rf_rs;
+assign out.rt   = (in.dst == rt && ctrl.write) ? in.rd : rf_rt;
 
 RType instr_r;
 assign instr_r = RType'(in.instr);

@@ -2,7 +2,7 @@ import definitions::*;
 
 module XM(	input wire clk,
 		input wire rst,
-
+		input Signal bubble,
 		input XM_ctrl ctrl,
 
 		// Data from Execute
@@ -21,6 +21,14 @@ module XM(	input wire clk,
 );
 
 always_ff @ (posedge clk) begin
+if(bubble) begin
+	mw_ctrl <= MW_ctrl'(0);
+	m_ctrl <= M_ctrl'(0);
+	m_data <= M_data'(0);
+	m_src <= RegAddr'(0);
+	pc_jmp_o <= ProgramCounter'(0);
+end
+else begin
 	mw_ctrl          <= ctrl.mw;
 	m_ctrl           <= ctrl.m;
 	m_data.dst       <= (rst) ? RegAddr'(0) : x_out.dst_addr;
@@ -31,6 +39,6 @@ always_ff @ (posedge clk) begin
 	m_src            <= x_out.rt_addr;
 	pc_jmp_o         <= pc_jmp;
 end
-
+end
 endmodule
 

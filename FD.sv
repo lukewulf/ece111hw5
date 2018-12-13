@@ -3,6 +3,7 @@ import definitions::*;
 module FD(
 	input wire clk,
 	input wire rst,
+	input Signal bubble,
 	input Signal stall,
 		
 	input ProgramCounter next_pc_i,
@@ -13,7 +14,11 @@ module FD(
 );
 
 always_ff@(posedge clk) begin
-	if(stall == DISABLE) begin
+	if(bubble) begin
+		next_pc_o <= ProgramCounter'(0);
+		instr_o <= Instruction'(0);
+	end
+	else if(stall == DISABLE) begin
 		next_pc_o <= next_pc_i;
 		instr_o   <= instr_i;
 	end
