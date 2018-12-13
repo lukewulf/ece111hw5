@@ -4,6 +4,7 @@ module FPU(
     input           clk, rst,
 
     input  Signal   start,
+    input  Signal   stall,
     input  RegAddr  fs_addr,
     input  RegAddr  ft_addr,
     input  RegAddr  fd_addr,
@@ -29,7 +30,7 @@ assign rf_addr_i = (fpu_done) ? fpu_addr : m_addr;
 Signal rf_write;
 assign rf_write = Signal'(fpu_done | m_write);
 
-wire always_add; assign always_add = 1;
+wire always_add; assign always_add = 0;
 
 Register fs, ft;
 Register fs_o, ft_o;
@@ -40,21 +41,32 @@ assign out.dst = out_dst;
 
 Signal flag_i;
 
-always_ff @ (posedge clk) begin
-    fs <= fs_o;
-    ft <= ft_o;
-    out_dst <= fd_addr;
+Register fs_i, ft_i;
 
-    if ( working ) fpu_addr <= fpu_addr;
-    else           fpu_addr <=  fd_addr;
+assign fs_i = ( m_addr == fs_addr && m_write ) ? m_data : fs_o;
+assign ft_i = ( m_addr == ft_addr && m_write ) ? m_data : ft_o;
+
+always_ff @ (posedge clk) begin
+    fs      <= fs_o;
+    ft      <= ft_o;
+
+    if ( stall ) out_dst <= RegAddr'(0);
+    else         out_dst <= fd_addr;
+
+    if ( working | stall ) fpu_addr <= fpu_addr;
+    else                   fpu_addr <=  fd_addr;
 
     if      ( fpu_done ) begin
-        flag_i  <= ENABLE;
+        flag_i  <= DISABLE;
         working <= DISABLE;
     end
     else if ( working  ) begin
         flag_i  <= DISABLE;
         working <= ENABLE;
+    end
+    else if ( stall    ) begin
+        flag_i  <= DISABLE;
+        working <= DISABLE;
     end
     else if ( start    ) begin
         flag_i  <= ENABLE;
@@ -72,7 +84,7 @@ fp_13 fpu_internal(
     .flag_i(flag_i),
 
     .op(always_add),
-    .a(fs), .b(ft),
+    .a(fs_i), .b(ft_i),
     .c(fpu_data),
 
     .flag_o(fpu_done)

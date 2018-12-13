@@ -147,6 +147,12 @@ assign h_i.Xrd = xm_data.dst;  //   RegAddr Xrd;
 assign h_i.read_mem = m_ctrl.read_mem;
 
 assign h_i.Mrd = wb_in.dst;    //   RegAddr Mrd;
+
+assign h_i.Dfs = d_out.fs_a;
+assign h_i.Dft = d_out.ft_a;
+
+assign h_i.Xfd = fpu_out.dst;
+assign h_i.Mfd = xm_data.fpu_dst;
 // }
 
 assign y = m_out.val;
@@ -226,7 +232,7 @@ DXForwarding dx_forward(
 FPU fpu(
 	.clk(clk), .rst(rst),
 	.start(dx_ctrl.fpu.start),
-
+	.stall(h_o.stallD),
 	.fs_addr(d_out.fs_a),
 	.ft_addr(d_out.ft_a),
 	.fd_addr(d_out.fd_a),

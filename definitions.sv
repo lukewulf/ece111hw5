@@ -258,6 +258,10 @@ typedef struct packed{
   RegAddr Mrd;
   Signal  read_mem;
   Signal fpu_working;
+  RegAddr Dfs;
+  RegAddr Dft;
+  RegAddr Xfd;
+  RegAddr Mfd;
 } Hazard_input;
 
 typedef struct packed{

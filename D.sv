@@ -90,6 +90,18 @@ always_comb begin
             rd    = RegAddr'(0);  // dont care
         end
 
+        LWC1: begin
+            rs = instr_i.rs;
+            rt = RegAddr'(0);
+            rd = RegAddr'(0);
+        end
+
+        SWC1: begin
+            rs = instr_i.rs;
+            rt = RegAddr'(0);
+            rd = RegAddr'(0);
+        end
+
         default: begin // J
             // nothing even matters
             rs    = RegAddr'(0);
@@ -99,13 +111,13 @@ always_comb begin
     endcase
     case( opcode )  // floating point unit info
         LWC1: begin
-            fs = instr_fr.fs;
+            fs = RegAddr'(0);
             ft = RegAddr'(0);
-            fd = instr_fr.fd;
+            fd = instr_i.rt;
         end
         SWC1: begin
-            fs = instr_fr.fs;
-            ft = instr_fr.ft;
+            fs = RegAddr'(0);
+            ft = instr_i.rt;
             fd = RegAddr'(0);
         end
         ADDS: begin
