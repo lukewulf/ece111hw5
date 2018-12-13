@@ -11,20 +11,20 @@ module D(
 );
 
 RegAddr rs, rt, rd;
+RegAddr fs, ft, fd;
 
 assign out.rs_a = rs;
 assign out.rt_a = rt;
 assign out.rd_a = rd;
-assign out.fs_a = rs;
-assign out.ft_a = rt;
-assign out.fd_a = rd;
 
-Register rf_rs, rf_rt, rf_fs, rf_ft;
+assign out.fs_a = fs;
+assign out.ft_a = ft;
+assign out.fd_a = fd;
 
-assign out.rs   = (in.dst == rs && ctrl.write) ? in.rd : rf_rs;
-assign out.rt   = (in.dst == rt && ctrl.write) ? in.rd : rf_rt;
-assign out.fs   = (in.dst == rs && ctrl.fp_write) ? in.rd : rf_fs;
-assign out.ft   = (in.dst == rt && ctrl.fp_write) ? in.rd : rf_ft;
+Register rf_rs, rf_rt;
+
+assign out.rs   = (in.dst == rs && ctrl.write   ) ? in.rd : rf_rs;
+assign out.rt   = (in.dst == rt && ctrl.write   ) ? in.rd : rf_rt;
 
 RType instr_r;
 assign instr_r = RType'(in.instr);
@@ -54,22 +54,6 @@ RegisterFile RF(
 
     .rs_o(rf_rs),
     .rt_o(rf_rt)
-);
-
-// Floating Point Register File
-RegisterFile FRF(
-    .clk(clk),
-    .reset(reset),
-
-    .write(ctrl.fp_write),
-    .rd_i(in.rd),
-
-    .rs(rs),
-    .rt(rt),
-    .rd(in.dst),
-
-    .rs_o(rf_fs),
-    .rt_o(rf_ft)
 );
 
 always_comb begin
@@ -105,18 +89,34 @@ always_comb begin
             rt    = instr_i.rt;
             rd    = RegAddr'(0);  // dont care
         end
-	
-	ADDS: begin
-	    rs = instr_fr.fs;
-	    rt = instr_fr.ft;
-            rd = instr_fr.fd;
-	end
 
         default: begin // J
             // nothing even matters
             rs    = RegAddr'(0);
             rt    = RegAddr'(0);
             rd    = RegAddr'(0);
+        end
+    endcase
+    case( opcode )  // floating point unit info
+        LWC1: begin
+            fs = instr_fr.fs;
+            ft = RegAddr'(0);
+            fd = instr_fr.fd;
+        end
+        SWC1: begin
+            fs = instr_fr.fs;
+            ft = instr_fr.ft;
+            fd = RegAddr'(0);
+        end
+        ADDS: begin
+            fs = instr_fr.fs;
+            ft = instr_fr.ft;
+            fd = instr_fr.fd;
+        end
+        default begin
+            fs = RegAddr'(0);
+            ft = RegAddr'(0);
+            fd = RegAddr'(0);
         end
     endcase
 end

@@ -20,7 +20,9 @@ typedef enum logic[5:0]{
   ADDI  = 6'h08,
   LW    = 6'h23,
   SW    = 6'h2b,
-  ADDS  = 6'h11
+  ADDS  = 6'h11,
+  LWC1  = 6'h31,
+  SWC1  = 6'h39
 } OpCode;
 
 typedef enum logic[1:0]{
@@ -96,7 +98,6 @@ typedef struct packed {
   Signal branch;
   Signal jmp;
   Signal fpu_to_mem;
-  Signal fpu_to_wb;
 } M_ctrl;
 
 typedef struct packed {
@@ -107,6 +108,7 @@ typedef struct packed {
   alu_control_signals alu_op;
   Signal  alu_src;
   Signal  reg_dst;
+  Signal  fpu_start;
 } X_ctrl;
 
 typedef struct packed {
@@ -115,8 +117,13 @@ typedef struct packed {
 } XM_ctrl;
 
 typedef struct packed {
-  XM_ctrl xm;
-  X_ctrl  x;
+  Signal start;
+} FPU_ctrl;
+
+typedef struct packed {
+  XM_ctrl  xm;
+  X_ctrl   x;
+  FPU_ctrl fpu;
 } DX_ctrl;
 
 typedef struct packed {
@@ -128,11 +135,6 @@ typedef struct packed {
   RegAddr  rt_a;
   Register rt_d;
   RegAddr  rd_a;
-  RegAddr  fs_a;
-  Register fs_d;
-  RegAddr  ft_a;
-  Register ft_d;
-  RegAddr  fd_a;
   Register imm;
 } DX_data;
 
@@ -167,11 +169,11 @@ typedef struct packed {
   Register       rt;
   RegAddr        rt_a;
   RegAddr        rd_a;
-  Register       fs;
+
   RegAddr        fs_a;
-  Register       ft;
   RegAddr        ft_a;
   RegAddr        fd_a;
+
   ProgramCounter pc_jmp;
 } D_output;
 
@@ -206,16 +208,16 @@ typedef struct packed{
 } FPU_input;
 
 typedef struct packed{
-  Register	  ft;		// ft value for sw1c
-  Register        fpu;		// fpu output
+  Register	  ft;
+  RegAddr     dst;
 } FPU_output;
 
 typedef struct packed {
-  Register alu_addr;
-  Register fpu_addr;
+  Register addr;
   Register alu_val; 
   Register fpu_val;
   RegAddr  dst;
+  RegAddr fpu_dst;
   Signal   alu_zero;
   ProgramCounter pc_branch;
 } XM_data;
@@ -225,7 +227,6 @@ typedef struct packed {
   Signal write;
   Register addr;
   Register val;
-  RegAddr dst;
 } M_input;
 
 typedef struct packed {
@@ -235,12 +236,15 @@ typedef struct packed {
 typedef struct packed {
   Register mem;
   Register alu;
+  Register fpu;
   RegAddr  dst;
+  RegAddr fpu_dst;
 } WB_input;
 
 typedef struct packed {
   Register val;
   RegAddr  dst;
+  RegAddr  fpu_dst;
 } WB_output;
 
 typedef struct packed{
@@ -254,6 +258,7 @@ typedef struct packed{
   RegAddr Mrt;
   RegAddr Mrd;
   Signal  read_mem;
+  Signal fpu_working;
 } Hazard_input;
 
 typedef struct packed{
@@ -265,5 +270,49 @@ typedef struct packed{
   Signal stallD;
   Signal stallIF;
 } Hazard_output;
+
+// FPU stuff
+
+typedef logic        Sign;
+typedef logic [ 7:0] Exponent;
+typedef logic [22:0] Mantissa;
+
+typedef logic [23:0] Mantissa_ext;
+
+typedef struct packed {
+    Sign     sign;
+    Exponent exp;
+    Mantissa mnt;
+} Float32;
+
+typedef struct packed {
+    Sign         sign;
+    Exponent     exp;
+    Mantissa_ext mnt;
+} Float32_ext;
+
+typedef struct packed {
+    logic op;
+    Float32 a;
+    Float32 b;
+} Compare_in;
+
+typedef struct packed {
+    logic        op;
+    logic        flip;
+
+    Float32 gt;
+    Float32 lt;
+    Exponent e_dif;
+} Operate_in;
+
+typedef struct packed {
+    logic        op;
+    logic        flip;
+
+    Sign         sign;
+    Exponent     exp;
+    logic [24:0] mnt;
+} Align_in;
 	 
 endpackage // defintions

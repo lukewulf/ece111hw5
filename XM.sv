@@ -33,10 +33,10 @@ else begin
 	mw_ctrl          <= ctrl.mw;
 	m_ctrl           <= ctrl.m;
 	xm_data.dst       <= (rst) ? RegAddr'(0) : x_out.dst_addr;
-	xm_data.alu_addr  <= x_out.alu;
+	xm_data.fpu_dst       <= (rst) ? RegAddr'(0) : fpu_out.dst;
+	xm_data.addr      <= x_out.alu;
 	xm_data.alu_val   <= x_out.rt;
-	xm_data.fpu_addr  <= fpu_out.fpu;
-        xm_data.fpu_val   <= fpu_out.ft;
+    xm_data.fpu_val   <= fpu_out.ft;
 	xm_data.alu_zero  <= x_out.zero;
 	xm_data.pc_branch <= x_out.pc_branch;
 	m_src            <= x_out.rt_addr;

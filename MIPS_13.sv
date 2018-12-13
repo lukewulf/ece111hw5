@@ -67,6 +67,8 @@ X_input  x_in;
 X_output x_out;
 X_ctrl   x_ctrl;
 
+FPU_output fpu_out;
+
 XM_ctrl xm_ctrl;
 
 // Data Memory Wires
@@ -114,8 +116,10 @@ assign d_in.dst   = wb_out.dst;
 // assign m_in.data = m_data;
 
 assign mw_data.mem = m_out.val;
-assign mw_data.alu = xm_data.alu_addr;
+assign mw_data.alu = xm_data.alu_val;
+assign mw_data.fpu = xm_data.fpu_val;
 assign mw_data.dst = xm_data.dst;
+assign mw_data.fpu_dst = xm_data.fpu_dst;
 
 // Stage Buffer Wiring
 
@@ -129,11 +133,6 @@ assign dx_in.rs_d   = d_out.rs;
 assign dx_in.rt_a   = d_out.rt_a;
 assign dx_in.rt_d   = d_out.rt;
 assign dx_in.rd_a   = d_out.rd_a;
-assign dx_in.fs_a = d_out.fs_a;
-assign dx_in.fs_d = d_out.fs;
-assign dx_in.ft_a = d_out.ft_a;
-assign dx_in.ft_d = d_out.ft;
-assign dx_in.fd_a = d_out.fd_a;
 assign dx_in.imm    = {{16{d_in.instr[15]}}, d_in.instr[15:0]};
 assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
@@ -216,12 +215,28 @@ DXForwarding dx_forward(
 	.fwdM_rt(h_o.fwdMX_rt),
 
 	.M_d(m_d_forward),
-	.X_d(xm_data.alu_addr),
+	.X_d(xm_data.addr),
 
 	.dx_out(dx_out),
 	.dx_xm_ctrl(dx_xm_ctrl),
 	.xm_ctrl(xm_ctrl),
 	.x_in(x_in)
+);
+
+FPU fpu(
+	.clk(clk), .rst(rst),
+	.start(x_in.ctrl.fpu_start),
+
+	.fs_addr(d_out.fs_a),
+	.ft_addr(d_out.ft_a),
+	.fd_addr(d_out.fd_a),
+
+	.m_addr(wb_out.fpu_dst),
+	.m_data(wb_out.val),
+	.m_write(wb_ctrl.fpu_write),
+
+	.working(h_i.fpu_working),
+	.out(fpu_out)
 );
 
 X execute(
@@ -235,12 +250,13 @@ XM execute_mem_buffer(
 	.bubble(dx_bubble),
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
+	.fpu_out(fpu_out),
 	.pc_jmp(dx_pc_jmp),
 
 	.mw_ctrl(mw_ctrl),
 	.m_ctrl(m_ctrl),
 
-	.m_data(m_data),
+	.xm_data(xm_data),
 	.m_src(h_i.Xrt),
 	.pc_jmp_o(xm_pc_jmp)
 );
@@ -249,11 +265,10 @@ XMForwarding xm_forward(
 	.fwdM_rt(h_o.fwdMM_rt),
 	.M_d(wb_out.val),
 
-	.m_data(m_data),
+	.xm_data(xm_data),
 	.read_mem(m_ctrl.read_mem),
 	.write_mem(m_ctrl.write_mem),
 	.fpu_to_mem(m_ctrl.fpu_to_mem),
-	.fpu_to_wb(m_ctrl.fpu_to_wb),
 
 	.m_in(m_in)
 );
