@@ -33,7 +33,7 @@ else begin
 	mw_ctrl          <= ctrl.mw;
 	m_ctrl           <= ctrl.m;
 	xm_data.dst       <= (rst) ? RegAddr'(0) : x_out.dst_addr;
-	xm_data.fpu_dst       <= (rst) ? RegAddr'(0) : fpu_out.dst;
+	xm_data.fpu_dst   <= (rst) ? RegAddr'(0) : fpu_out.dst;
 	xm_data.addr      <= x_out.alu;
 	xm_data.alu_val   <= x_out.rt;
     xm_data.fpu_val   <= fpu_out.ft;

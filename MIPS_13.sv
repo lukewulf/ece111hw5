@@ -116,7 +116,7 @@ assign d_in.dst   = wb_out.dst;
 // assign m_in.data = m_data;
 
 assign mw_data.mem = m_out.val;
-assign mw_data.alu = xm_data.alu_val;
+assign mw_data.alu = xm_data.addr;
 assign mw_data.fpu = xm_data.fpu_val;
 assign mw_data.dst = xm_data.dst;
 assign mw_data.fpu_dst = xm_data.fpu_dst;
@@ -225,7 +225,7 @@ DXForwarding dx_forward(
 
 FPU fpu(
 	.clk(clk), .rst(rst),
-	.start(x_in.ctrl.fpu_start),
+	.start(dx_ctrl.fpu.start),
 
 	.fs_addr(d_out.fs_a),
 	.ft_addr(d_out.ft_a),

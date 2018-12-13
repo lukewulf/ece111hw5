@@ -108,7 +108,6 @@ typedef struct packed {
   alu_control_signals alu_op;
   Signal  alu_src;
   Signal  reg_dst;
-  Signal  fpu_start;
 } X_ctrl;
 
 typedef struct packed {

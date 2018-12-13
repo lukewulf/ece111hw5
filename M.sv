@@ -9,7 +9,7 @@ Register mem [2**MemAddrWidth];
 
 initial begin
 	$display("TEST");
-	$readmemh("prog2_mem.hex", mem);
+	$readmemh("prog1_mem.hex", mem);
 end
 
 wire [MemAddrWidth-1:0] _addr;
