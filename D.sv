@@ -15,11 +15,16 @@ RegAddr rs, rt, rd;
 assign out.rs_a = rs;
 assign out.rt_a = rt;
 assign out.rd_a = rd;
+assign out.fs_a = rs;
+assign out.ft_a = rt;
+assign out.fd_a = rd;
 
-Register rf_rs, rf_rt;
+Register rf_rs, rf_rt, rf_fs, rf_ft;
 
 assign out.rs   = (in.dst == rs && ctrl.write) ? in.rd : rf_rs;
 assign out.rt   = (in.dst == rt && ctrl.write) ? in.rd : rf_rt;
+assign out.fs   = (in.dst == rs && ctrl.fp_write) ? in.rd : rf_fs;
+assign out.ft   = (in.dst == rt && ctrl.fp_write) ? in.rd : rf_ft;
 
 RType instr_r;
 assign instr_r = RType'(in.instr);
@@ -29,6 +34,9 @@ assign instr_i = IType'(in.instr);
 
 JType instr_j;
 assign instr_j = JType'(in.instr);
+
+FRType instr_fr;
+assign instr_fr = FRType'(in.instr);
 
 OpCode [5:0] opcode;
 assign opcode = OpCode'(in.instr[31:26]);
@@ -46,6 +54,22 @@ RegisterFile RF(
 
     .rs_o(rf_rs),
     .rt_o(rf_rt)
+);
+
+// Floating Point Register File
+RegisterFile FRF(
+    .clk(clk),
+    .reset(reset),
+
+    .write(ctrl.fp_write),
+    .rd_i(in.rd),
+
+    .rs(rs),
+    .rt(rt),
+    .rd(in.dst),
+
+    .rs_o(rf_fs),
+    .rt_o(rf_ft)
 );
 
 always_comb begin
@@ -81,6 +105,12 @@ always_comb begin
             rt    = instr_i.rt;
             rd    = RegAddr'(0);  // dont care
         end
+	
+	ADDS: begin
+	    rs = instr_fr.fs;
+	    rt = instr_fr.ft;
+            rd = instr_fr.fd;
+	end
 
         default: begin // J
             // nothing even matters

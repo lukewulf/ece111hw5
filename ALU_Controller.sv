@@ -18,6 +18,8 @@ begin
 				6'b10_0100: alu_op = ALU_O_AND;
 				// Or
 				6'b10_0101: alu_op = ALU_O_OR;
+				// XOR
+				6'b10_0110: alu_op = ALU_O_XOR;
 			endcase
 		end
 		2'b01:		// I Type Add -> ADD

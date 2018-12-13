@@ -19,7 +19,8 @@ typedef enum logic[5:0]{
   BEQ   = 6'h04,
   ADDI  = 6'h08,
   LW    = 6'h23,
-  SW    = 6'h2b
+  SW    = 6'h2b,
+  ADDS  = 6'h11
 } OpCode;
 
 typedef enum logic[1:0]{
@@ -29,11 +30,12 @@ typedef enum logic[1:0]{
   ALU_DC = 2'b11
 } alu_control_signals;
 
-typedef enum logic[1:0]{
-  ALU_O_ADD = 2'b00,
-  ALU_O_SUB = 2'b01,
-  ALU_O_AND = 2'b10,
-  ALU_O_OR = 2'b11
+typedef enum logic[2:0]{
+  ALU_O_ADD = 3'b000,
+  ALU_O_SUB = 3'b001,
+  ALU_O_AND = 3'b010,
+  ALU_O_OR = 3'b011,
+  ALU_O_XOR = 3'b100
 } alu_operation;
 
 typedef enum logic[5:0]{
@@ -73,9 +75,19 @@ typedef struct packed {
   JumpAddr addr;
 } JType;
 
+typedef struct packed{
+  OpCode opcode;
+  ShAmt fmt;
+  RegAddr ft;
+  RegAddr fs;
+  RegAddr fd;
+  Funct funct;
+} FRType;
+
 typedef struct packed {
   Signal reg_write;
   Signal mem_to_reg;
+  Signal fpu_write;
 } WB_ctrl;
 
 typedef struct packed {
@@ -83,6 +95,8 @@ typedef struct packed {
   Signal write_mem;
   Signal branch;
   Signal jmp;
+  Signal fpu_to_mem;
+  Signal fpu_to_wb;
 } M_ctrl;
 
 typedef struct packed {
@@ -114,6 +128,11 @@ typedef struct packed {
   RegAddr  rt_a;
   Register rt_d;
   RegAddr  rd_a;
+  RegAddr  fs_a;
+  Register fs_d;
+  RegAddr  ft_a;
+  Register ft_d;
+  RegAddr  fd_a;
   Register imm;
 } DX_data;
 
@@ -132,6 +151,7 @@ typedef struct packed {
 
 typedef struct packed {
   Signal write;
+  Signal fp_write;
 } D_control;
 
 typedef struct packed {
@@ -147,6 +167,11 @@ typedef struct packed {
   Register       rt;
   RegAddr        rt_a;
   RegAddr        rd_a;
+  Register       fs;
+  RegAddr        fs_a;
+  Register       ft;
+  RegAddr        ft_a;
+  RegAddr        fd_a;
   ProgramCounter pc_jmp;
 } D_output;
 
@@ -170,18 +195,37 @@ typedef struct packed {
   RegAddr         dst_addr;
 } X_output;
 
+typedef struct packed{
+  Register        fs;
+  Register        ft;
+  ProgramCounter  pc;
+  X_ctrl          ctrl;
+  RegAddr 	  fs_addr;
+  RegAddr 	  ft_addr;
+  RegAddr 	  fd_addr;
+} FPU_input;
+
+typedef struct packed{
+  Register	  ft;		// ft value for sw1c
+  Register        fpu;		// fpu output
+} FPU_output;
+
 typedef struct packed {
-  Register addr;
-  Register val; 
+  Register alu_addr;
+  Register fpu_addr;
+  Register alu_val; 
+  Register fpu_val;
   RegAddr  dst;
   Signal   alu_zero;
   ProgramCounter pc_branch;
-} M_data;
+} XM_data;
 
 typedef struct packed {
   Signal read;
   Signal write;
-  M_data data;
+  Register addr;
+  Register val;
+  RegAddr dst;
 } M_input;
 
 typedef struct packed {

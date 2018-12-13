@@ -35,6 +35,10 @@ always_comb
 		result_o = rs_i - rt_i;
 		end
 
+	ALU_O_XOR: begin
+		result_o = rs_i ^ rt_i;
+		end
+
   endcase
 
   zero = ~(|result_o);

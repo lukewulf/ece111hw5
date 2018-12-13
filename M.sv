@@ -9,11 +9,11 @@ Register mem [2**MemAddrWidth];
 
 initial begin
 	$display("TEST");
-	$readmemh("prog1_mem.hex", mem);
+	$readmemh("prog2_mem.hex", mem);
 end
 
 wire [MemAddrWidth-1:0] _addr;
-assign _addr = in.data.addr[MemAddrWidth-1+2:0+2];
+assign _addr = in.addr[MemAddrWidth-1+2:0+2];
 
 always_comb begin
     if (in.read == ENABLE) out.val = mem[_addr];
@@ -21,7 +21,7 @@ always_comb begin
 end
 
 always_ff @ (posedge clk) begin
-    if (in.write == ENABLE) mem[_addr] = in.data.val;
+    if (in.write == ENABLE) mem[_addr] = in.val;
 end
 
 endmodule
