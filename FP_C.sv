@@ -5,7 +5,8 @@ module FP_C(
     output Operate_in out
 );
 
-assign out.op = in.op;
+assign out.op  = in.op;
+assign out.dst = in.dst;
 
 float_cmp f_cmp(
     .a(in.a),   .b(in.b),

@@ -18,13 +18,13 @@ always_ff@(posedge clk) begin
 		next_pc_o <= ProgramCounter'(0);
 		instr_o <= Instruction'(0);
 	end
-	else if(stall == DISABLE) begin
-		next_pc_o <= next_pc_i;
-		instr_o   <= instr_i;
-	end
-	else begin
+	else if(stall) begin
 		next_pc_o <= next_pc_o;
 		instr_o   <= instr_o;
+	end
+	else begin
+		next_pc_o <= next_pc_i;
+		instr_o   <= instr_i;
 	end
 end
 

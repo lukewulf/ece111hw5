@@ -129,11 +129,19 @@ typedef struct packed {
   // Data from Instruction Decode
   ProgramCounter pc;
   ProgramCounter pc_jmp;
+
   RegAddr  rs_a;
   Register rs_d;
   RegAddr  rt_a;
   Register rt_d;
   RegAddr  rd_a;
+
+  RegAddr  fs_a;
+  Register fs_d;
+  RegAddr  ft_a;
+  Register ft_d;
+  RegAddr  fd_a;
+
   Register imm;
 } DX_data;
 
@@ -158,6 +166,8 @@ typedef struct packed {
 typedef struct packed {
   Register       rd;
   RegAddr        dst;
+  Register       fd;
+  RegAddr        fpu_dst;
   Instruction    instr;
   ProgramCounter pc;
 } D_input;
@@ -169,7 +179,9 @@ typedef struct packed {
   RegAddr        rt_a;
   RegAddr        rd_a;
 
+  Register       fs;
   RegAddr        fs_a;
+  Register       ft;
   RegAddr        ft_a;
   RegAddr        fd_a;
 
@@ -243,6 +255,7 @@ typedef struct packed {
 typedef struct packed {
   Register val;
   RegAddr  dst;
+  Register fpu_val;
   RegAddr  fpu_dst;
 } WB_output;
 
@@ -257,11 +270,12 @@ typedef struct packed{
   RegAddr Mrt;
   RegAddr Mrd;
   Signal  read_mem;
-  Signal fpu_working;
+
   RegAddr Dfs;
   RegAddr Dft;
-  RegAddr Xfd;
-  RegAddr Mfd;
+  RegAddr Cfd;
+  RegAddr Ofd;
+  RegAddr Afd;
 } Hazard_input;
 
 typedef struct packed{
@@ -298,6 +312,8 @@ typedef struct packed {
     logic op;
     Float32 a;
     Float32 b;
+
+    RegAddr dst;
 } Compare_in;
 
 typedef struct packed {
@@ -307,6 +323,8 @@ typedef struct packed {
     Float32 gt;
     Float32 lt;
     Exponent e_dif;
+
+    RegAddr dst;
 } Operate_in;
 
 typedef struct packed {
@@ -316,6 +334,13 @@ typedef struct packed {
     Sign         sign;
     Exponent     exp;
     logic [24:0] mnt;
+
+    RegAddr dst;
 } Align_in;
+
+typedef struct packed {
+    Float32 val;
+    RegAddr dst;
+} Align_out;
 	 
 endpackage // defintions

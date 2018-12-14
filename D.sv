@@ -22,9 +22,13 @@ assign out.ft_a = ft;
 assign out.fd_a = fd;
 
 Register rf_rs, rf_rt;
+Register rf_fs, rf_ft;
 
 assign out.rs   = (in.dst == rs && ctrl.write   ) ? in.rd : rf_rs;
 assign out.rt   = (in.dst == rt && ctrl.write   ) ? in.rd : rf_rt;
+
+assign out.fs   = (in.fpu_dst == rs && ctrl.fp_write   ) ? in.fd : rf_fs;
+assign out.ft   = (in.fpu_dst == rt && ctrl.fp_write   ) ? in.fd : rf_ft;
 
 RType instr_r;
 assign instr_r = RType'(in.instr);
@@ -54,6 +58,22 @@ RegisterFile RF(
 
     .rs_o(rf_rs),
     .rt_o(rf_rt)
+);
+
+
+RegisterFile FP_RF(
+    .clk(clk),
+    .reset(reset),
+
+    .write(ctrl.fp_write),
+    .rd_i(in.fd),
+
+    .rs(fs),
+    .rt(ft),
+    .rd(in.fpu_dst),
+
+    .rs_o(rf_fs),
+    .rt_o(rf_ft)
 );
 
 always_comb begin

@@ -3,8 +3,9 @@ import definitions::*;
 module FPU(
     input           clk, rst,
 
-    input  Signal   start,
     input  Signal   stall,
+
+    input  Signal   start,
     input  RegAddr  fs_addr,
     input  RegAddr  ft_addr,
     input  RegAddr  fd_addr,
@@ -43,8 +44,23 @@ Signal flag_i;
 
 Register fs_i, ft_i;
 
-assign fs_i = ( m_addr == fs_addr && m_write ) ? m_data : fs_o;
-assign ft_i = ( m_addr == ft_addr && m_write ) ? m_data : ft_o;
+assign fs_i = ( m_addr == fs_addr && m_write ) ? m_data : fs;
+assign ft_i = ( m_addr == ft_addr && m_write ) ? m_data : ft;
+
+always_ff @ (posedge clk) begin
+	if( stall ) begin
+		start_buf   <= start_buf;
+		fs_addr_buf <= fs_addr_buf;
+		ft_addr_buf <= ft_addr_buf;
+		fd_addr_buf <= fd_addr_buf;
+	end
+	else begin
+		start_buf   <= start;
+		fs_addr_buf <= fs_addr;
+		ft_addr_buf <= ft_addr;
+		fd_addr_buf <= fd_addr;
+	end
+end
 
 always_ff @ (posedge clk) begin
     fs      <= fs_o;

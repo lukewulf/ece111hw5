@@ -10,6 +10,8 @@ module XM(	input wire clk,
 		input FPU_output fpu_out,
 
 		input ProgramCounter pc_jmp,
+		
+		input Operate_in cmp_out,
 
 		// Control signals from control
 		output MW_ctrl mw_ctrl,
@@ -18,7 +20,9 @@ module XM(	input wire clk,
 		output XM_data  xm_data,
 		output RegAddr m_src,
 
-		output ProgramCounter pc_jmp_o
+		output ProgramCounter pc_jmp_o,
+
+		output Operate_in op_in
 );
 
 always_ff @ (posedge clk) begin
@@ -28,6 +32,7 @@ if(bubble) begin
 	xm_data <= XM_data'(0);
 	m_src <= RegAddr'(0);
 	pc_jmp_o <= ProgramCounter'(0);
+        op_in <= Operate_in'(0);
 end
 else begin
 	mw_ctrl          <= ctrl.mw;
@@ -41,6 +46,8 @@ else begin
 	xm_data.pc_branch <= x_out.pc_branch;
 	m_src            <= x_out.rt_addr;
 	pc_jmp_o         <= pc_jmp;
+
+        op_in <= cmp_out;
 end
 end
 endmodule

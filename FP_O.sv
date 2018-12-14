@@ -23,6 +23,7 @@ assign action = in.gt.sign ^ in.lt.sign ^ in.op;
 // operate on the aligned mantissas
 assign out.op   = in.op;
 assign out.flip = in.flip;
+assign out.dst  = in.dst;
 
 assign out.sign = in.gt.sign;
 assign out.exp  = in.gt.exp;

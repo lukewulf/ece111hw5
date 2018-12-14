@@ -90,12 +90,21 @@ WB_ctrl   wb_ctrl;
 Hazard_input h_i;
 Hazard_output h_o;
 
+// FPU stuff
+Compare_in cmp_in;
+Operate_in cmp_out;
+Operate_in op_in;
+Align_in   op_out;
+Align_in   align_in;
+Align_out  align_out;
+
 // Control Wiring
 assign if_in.stall    = h_o.stallIF;
 assign if_in.branch   = m_ctrl.branch;
 assign if_in.jmp      = m_ctrl.jmp;
 
 assign d_ctrl.write = wb_ctrl.reg_write;
+assign d_ctrl.fp_write = wb_ctrl.fpu_write;
 
 // assign x_in.reg_dst = x_ctrl.reg_dst;
 // assign x_in.alu_src = x_ctrl.alu_src;
@@ -110,8 +119,10 @@ assign if_in.alu_zero  = xm_data.alu_zero;
 assign if_in.pc_branch = xm_data.pc_branch;
 assign if_in.pc_jmp    = xm_pc_jmp;
 
-assign d_in.rd    = wb_out.val;
-assign d_in.dst   = wb_out.dst;
+assign d_in.rd       = wb_out.val;
+assign d_in.dst      = wb_out.dst;
+assign d_in.fd       = wb_out.fpu_val;
+assign d_in.fpu_dst  = wb_out.fpu_dst;
 
 // assign m_in.data = m_data;
 
@@ -133,6 +144,13 @@ assign dx_in.rs_d   = d_out.rs;
 assign dx_in.rt_a   = d_out.rt_a;
 assign dx_in.rt_d   = d_out.rt;
 assign dx_in.rd_a   = d_out.rd_a;
+
+assign dx_in.fs_d   = d_out.fs;
+assign dx_in.fs_a   = d_out.fs_a;
+assign dx_in.ft_d   = d_out.ft;
+assign dx_in.ft_a   = d_out.ft_a;
+assign dx_in.fd_a   = d_out.fd_a;
+
 assign dx_in.imm    = {{16{d_in.instr[15]}}, d_in.instr[15:0]};
 assign dx_in.pc_jmp = d_out.pc_jmp;
 //}
@@ -151,8 +169,9 @@ assign h_i.Mrd = wb_in.dst;    //   RegAddr Mrd;
 assign h_i.Dfs = d_out.fs_a;
 assign h_i.Dft = d_out.ft_a;
 
-assign h_i.Xfd = fpu_out.dst;
-assign h_i.Mfd = xm_data.fpu_dst;
+assign h_i.Cfd =   cmp_in.dst;
+assign h_i.Ofd =    op_in.dst;
+assign h_i.Afd = align_in.dst;
 // }
 
 assign y = m_out.val;
@@ -207,14 +226,18 @@ DX decode_execute_buffer(
 
 	.pc_jmp(dx_pc_jmp),
 	.xm_ctrl(dx_xm_ctrl),
-	.x_data(dx_out)
+	.x_data(dx_out),
+        .cmp_in(cmp_in)
 );
 
 Register m_d_forward;
 assign m_d_forward = (wb_ctrl.mem_to_reg == ENABLE) ? wb_in.mem : wb_in.alu;
 
+Signal dxf_bubble;
+assign dxf_bubble = Signal'(dx_bubble | h_o.stallD);
+
 DXForwarding dx_forward(
-	.bubble(dx_bubble),
+	.bubble(dxf_bubble),
 	.fwdX_rs(h_o.fwdXX_rs),
 	.fwdX_rt(h_o.fwdXX_rt),
 	.fwdM_rs(h_o.fwdMX_rs),
@@ -229,20 +252,9 @@ DXForwarding dx_forward(
 	.x_in(x_in)
 );
 
-FPU fpu(
-	.clk(clk), .rst(rst),
-	.start(dx_ctrl.fpu.start),
-	.stall(h_o.stallD),
-	.fs_addr(d_out.fs_a),
-	.ft_addr(d_out.ft_a),
-	.fd_addr(d_out.fd_a),
-
-	.m_addr(wb_out.fpu_dst),
-	.m_data(wb_out.val),
-	.m_write(wb_ctrl.fpu_write),
-
-	.working(h_i.fpu_working),
-	.out(fpu_out)
+FP_C fpu_compare(
+	.in(cmp_in),
+	.out(cmp_out)
 );
 
 X execute(
@@ -259,12 +271,16 @@ XM execute_mem_buffer(
 	.fpu_out(fpu_out),
 	.pc_jmp(dx_pc_jmp),
 
+	.cmp_out(cmp_out),
+
 	.mw_ctrl(mw_ctrl),
 	.m_ctrl(m_ctrl),
 
 	.xm_data(xm_data),
 	.m_src(h_i.Xrt),
-	.pc_jmp_o(xm_pc_jmp)
+	.pc_jmp_o(xm_pc_jmp),
+
+	.op_in(op_in)
 );
 
 XMForwarding xm_forward(
@@ -285,22 +301,37 @@ M mem(
 	.out(m_out)
 );
 
+FP_O fpu_operate(
+	.in(op_in),
+	.out(op_out)
+);
+
 MW mem_writeback_buffer(
 	.clk(clk),
 	.rst(rst),
 
 	.ctrl(mw_ctrl),
 	.data_i(mw_data),
+	.op_out(op_out),
 
 	.wb_ctrl(wb_ctrl),
-	.wb_data(wb_in)
+	.wb_data(wb_in),
+	.align_in(align_in)
+);
+
+FP_A fpu_align(
+	.in(align_in),
+	.out(align_out)
 );
 
 WB writeback(
 	.ctrl(wb_ctrl),
 	.in(wb_in),
+	.align_out(align_out),
 	.out(wb_out)
 );
+
+
 
 Hazard hazard(
 	.h_i(h_i),

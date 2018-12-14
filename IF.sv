@@ -16,10 +16,10 @@ assign out.pc = _pc;
 always_ff@(posedge clk) begin
   if(reset == ENABLE)
     _pc <= 0;
-  else if (in.stall == ENABLE)
-    _pc <= _pc;
   else if (in.jmp == ENABLE)
     _pc <= in.pc_jmp;
+  else if (in.stall == ENABLE)
+    _pc <= _pc;
   else if (pc_src == 1'b1)
     _pc <= in.pc_branch;
   else
