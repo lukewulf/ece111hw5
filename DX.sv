@@ -13,7 +13,8 @@ module DX(
   output ProgramCounter pc_jmp,
   output XM_ctrl xm_ctrl,
   output X_input x_data,
-  output Compare_in cmp_in
+  output Compare_in cmp_in,
+  output Register ft
 );
 
 always_ff @(posedge clk) begin
@@ -22,12 +23,14 @@ always_ff @(posedge clk) begin
     xm_ctrl <= XM_ctrl'(0);
     x_data  <= X_input'(0);
     cmp_in  <= Compare_in'(0);
+    ft      <= Register'(0);
   end
   else if (stall) begin
     pc_jmp  <= pc_jmp;
     xm_ctrl <= xm_ctrl;
     x_data  <= x_data;
     cmp_in  <= cmp_in;
+    ft      <= ft;
   end
   else begin
     pc_jmp         <= data_i.pc_jmp;
@@ -46,7 +49,9 @@ always_ff @(posedge clk) begin
     cmp_in.op      <= 0;
     cmp_in.a       <= Float32'(data_i.fs_d);
     cmp_in.b       <= Float32'(data_i.ft_d);
-    cmp_in.dst     <= data_i.fd_a;   
+    cmp_in.dst     <= data_i.fd_a; 
+
+    ft             <= data_i.ft_d;  
   end
 end
 

@@ -62,12 +62,12 @@ Signal dx_bubble;
 X_input dx_out;
 ProgramCounter dx_pc_jmp;
 
+Register dx_xm_ft;
+
 // Execute Wires
 X_input  x_in;
 X_output x_out;
 X_ctrl   x_ctrl;
-
-FPU_output fpu_out;
 
 XM_ctrl xm_ctrl;
 
@@ -227,7 +227,8 @@ DX decode_execute_buffer(
 	.pc_jmp(dx_pc_jmp),
 	.xm_ctrl(dx_xm_ctrl),
 	.x_data(dx_out),
-        .cmp_in(cmp_in)
+    .cmp_in(cmp_in),
+	.ft(dx_xm_ft)
 );
 
 Register m_d_forward;
@@ -268,7 +269,7 @@ XM execute_mem_buffer(
 	.bubble(dx_bubble),
 	.ctrl(xm_ctrl),
 	.x_out(x_out),
-	.fpu_out(fpu_out),
+	.ft(dx_xm_ft),
 	.pc_jmp(dx_pc_jmp),
 
 	.cmp_out(cmp_out),

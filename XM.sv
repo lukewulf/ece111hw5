@@ -7,7 +7,7 @@ module XM(	input wire clk,
 
 		// Data from Execute
 		input X_output x_out,
-		input FPU_output fpu_out,
+		input Register ft,
 
 		input ProgramCounter pc_jmp,
 		
@@ -32,16 +32,16 @@ if(bubble) begin
 	xm_data <= XM_data'(0);
 	m_src <= RegAddr'(0);
 	pc_jmp_o <= ProgramCounter'(0);
-        op_in <= Operate_in'(0);
+    op_in <= Operate_in'(0);
 end
 else begin
 	mw_ctrl          <= ctrl.mw;
 	m_ctrl           <= ctrl.m;
 	xm_data.dst       <= (rst) ? RegAddr'(0) : x_out.dst_addr;
-	xm_data.fpu_dst   <= (rst) ? RegAddr'(0) : fpu_out.dst;
+	xm_data.fpu_dst   <= RegAddr'(0);
 	xm_data.addr      <= x_out.alu;
 	xm_data.alu_val   <= x_out.rt;
-    xm_data.fpu_val   <= fpu_out.ft;
+    xm_data.fpu_val   <= ft;
 	xm_data.alu_zero  <= x_out.zero;
 	xm_data.pc_branch <= x_out.pc_branch;
 	m_src            <= x_out.rt_addr;
