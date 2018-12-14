@@ -5,7 +5,7 @@ logic rst;
 
 wire y;
 
-MIPS_13 processor(
+MIPS_CP1_13 processor(
     .clk(clk),
     .rst(rst),
     .y(y)

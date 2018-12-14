@@ -1,7 +1,7 @@
 
 import definitions::*;
 
-module MIPS_13(
+module MIPS_CP1_13(
   input clk,  
         rst,
   output y
