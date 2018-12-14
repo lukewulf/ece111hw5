@@ -20,7 +20,7 @@ Instruction inst_rom [2**IW];	   // 2**IW elements, 32 bits ea
 initial 
 begin
 	$display("TEST");
-	$readmemh("prog1.hex", inst_rom);
+	$readmemh("prog3.hex", inst_rom);
 end
 
 // continuous combinational read output  
