@@ -14,7 +14,9 @@ module InstROM #(parameter IW=4)(
   output Instruction    instr
 );
 	 
-Instruction inst_rom [2**IW];	   // 2**IW elements, 32 bits ea
+// Instruction inst_rom [2**IW];	   // 2**IW elements, 32 bits ea
+
+reg  [7:0] inst_rom  [2**(IW+2)];
 
 // load machine code program into instruction ROM
 initial 
@@ -25,6 +27,11 @@ end
 
 // continuous combinational read output  
 // change the pointer (from program counter) ==> change the output
-assign instr = inst_rom[addr[IW-1:0]];
+assign instr = Instruction'({
+  inst_rom[{addr[IW-1:0], 2'b00}],
+  inst_rom[{addr[IW-1:0], 2'b01}],
+  inst_rom[{addr[IW-1:0], 2'b10}],
+  inst_rom[{addr[IW-1:0], 2'b11}]
+});
 
 endmodule

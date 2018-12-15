@@ -1,16 +1,16 @@
 Evaluation:
 * Area:
-    * LUT: 737 (1.80)
-    * LUTRAM: 32 (0.24)
-    * FF: 776 (0.95)
+    * LUT: 2227 (5.43)
+    * FF: 2554 (3.11)
+    * LUTRAM: 0 (0)
 * Time:
-    * Clock Period: 5.75ns
+    * Clock Period: 7.00ns
     * Clock Cycles:
         * Program 1: 51  cycles
         * Program 2: 10  cycles
         * Program 3: 195 cycles
-* Power Consumption: 0.118 W
+* Power Consumption: 0.155 W
 * Cost Function:
-    * Program 1: (1.80 + 0.95) * (5.75 ns) * ( 51 cycles) * 0.118 W = 95.16
-    * Program 2: (1.80 + 0.95) * (5.75 ns) * ( 10 cycles) * 0.118 W = 18.66
-    * Program 3: (1.80 + 0.95) * (5.75 ns) * (195 cycles) * 0.118 W = 363.85
+    * Program 1: (5.43 + 3.11) * (7.00 ns) * ( 51 cycles) * 0.155 W = 472.56
+    * Program 2: (5.43 + 3.11) * (7.00 ns) * ( 10 cycles) * 0.155 W = 92.66
+    * Program 3: (5.43 + 3.11) * (7.00 ns) * (195 cycles) * 0.155 W = 1806.85
